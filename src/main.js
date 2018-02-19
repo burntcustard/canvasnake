@@ -1,16 +1,18 @@
-/*jslint plusplus: true, browser: true, devel: true, white: true*/
-
 
 import * as food from './food.js';
 import * as input from './input.js';
 import newGame from './newGame.js';
 import { check as checkCollision } from './collision.js';
-import * as view from './view.js';
+import { render } from './view.js';
 import { Snake as Snake, order as orderSnakes } from './snake.js';
 import * as ai from './ai.js';
 import { snakeInfo as snakeInfo } from './infoString.js';
 
+
+
 var canvasnakeRunning = false;
+
+
 
 function canvasnake() {
 
@@ -35,7 +37,7 @@ function canvasnake() {
         // Customizable user interface variables for bigger font etc.
         ui: {
             textSize: 16,  // Base font size. Large font is "textSize * 2"
-            cellSize: 15,  // Diameter of square cell in grid
+            cellSize: 15,  // Diameter of square cell in grid in pixels
             scale: 1,      // "Scale factor" used to scale (1x, 2x, size etc.)
             bgColor: "white",
             textColor: "orangered",
@@ -53,7 +55,7 @@ function canvasnake() {
         updateInterval: 0, // How frequently the turns occur in ms (lower number = faster).
         board: {w: 0, h: 0}, // Current grid/board setup is 0 to 29 (inclusive), so 30x30
 
-        highScore: 0,  // Holds the highest score accomplished on that PC/web browers.
+        highScore: 0,   // Holds the highest score accomplished on that PC/web browers.
         snakes: [],     // Array of snake objects that are on the board (human player snakes and/or AI snakes).
         foodArray: [],  // Array of foods that are on the board
         debugSquares: [],
@@ -215,7 +217,12 @@ function canvasnake() {
 
       // - RENDER - //
 
-    view.render(game);
+    render(game);
+          
+    
+    if (game.state.gameOver && game.settings.autoRepeat === true) {
+        newGame(game);
+    }
 
       // Set game speed (will be different only if you ate something, but not worth if-ing)
       game.updateInterval = 0;

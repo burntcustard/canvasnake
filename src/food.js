@@ -66,12 +66,7 @@ export function create(amount, game) {
       // Place food in a random grid location on the canvas:
         do {
             validFood = true;
-            /*newFood = {
-                x: Math.floor(Math.random() * game.board.w),
-                y: Math.floor(Math.random() * game.board.h),
-                color: foodType.color
-            };*/
-            newFood = foodType;
+            newFood = Object.assign({}, foodType);
             newFood.x = Math.floor(Math.random() * game.board.w);
             newFood.y = Math.floor(Math.random() * game.board.h);
             for (snakeJ = 0; snakeJ < game.snakes.length; snakeJ++) {
@@ -87,7 +82,7 @@ export function create(amount, game) {
                 }
             }
             if (!validFood) { failedFoodCount++; }
-            if (failedFoodCount > 99) { throw new Error("createFood(): Failed to create new food. (╯°□°）╯︵ ┻━┻"); }
+            if (failedFoodCount > 99) { throw new Error("Failed to create new food. (╯°□°）╯︵ ┻━┻"); }
         } while (!validFood);
 
         // Put the newly created food element into the array of foods:
@@ -104,10 +99,10 @@ export function create(amount, game) {
 * @param {Char}   food  - The type of food that's being eaten.
 */
 export function eat(snake, food, game) {
+    
+    //console.log(food);
 
     var noOfNewFoods = 0; // The amount of new foods that's going to be added.
-
-    console.log(food);
 
     switch (food.char) {
       case 'P': snake.speed = Math.round(snake.speed - snake.speed / 8); break;  // Speed up the snake.
@@ -125,7 +120,8 @@ export function eat(snake, food, game) {
     snake.movesSinceNommed = 0;
 
     // Remove eaten food from the game:
-    game.foodArray.splice(game.nommedFood, 1);
+    // game.nommedFood may or may not exist so er that needs sorting
+    game.foodArray.splice(food, 1);
 
     // If there's no more food left on the board, and you're not banana'ing, spawn +1 food
     if ((game.foodArray.length === 0) && (noOfNewFoods === 0)) { noOfNewFoods++; }

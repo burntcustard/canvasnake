@@ -171,9 +171,6 @@ export default function newGame(game) {
 
     }
 
-
-    console.log(game.snakes);
-
     if (typeof game.gameLoop !== "undefined") { clearInterval(game.gameLoop); }
     game.gameLoop = setInterval(game.mainLoopFunc, 1);
 

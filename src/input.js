@@ -1,6 +1,6 @@
 
 import newGame from './newGame.js';
-import { toggleDebug, reSize } from './view.js';
+import { toggleDebug, reScale } from './view.js';
 
 
 // Touchscreen variables:
@@ -8,6 +8,7 @@ var qrCode = document.getElementById("qrCode"),
     // Get the coordinates (i.e. offset) of the element that receives touch events
     touchBox = qrCode.getBoundingClientRect(),
     touch = {x: 0, y: 0};
+
 
 
 export function get(game, document, canvas) {
@@ -94,34 +95,31 @@ export function get(game, document, canvas) {
 
 function handleInput(input, game) {
 
-    console.log("Trying to handle input of " + input);
-
     var snakeI,
         snakes = game.snakes,
-        gameMode = game.gameMode,
         gameRepeat = game.settings.autoRepeat;
 
     //console.log("Doing something with input");
     game.step = false;
     switch (input) {
 
-      // Game mode selection
-      case "0" : gameMode = "singleplayer";      break;
-      case "1" : gameMode = "singleplayerVsAI";  break;
-      case "2" : gameMode = "2 player";          break;
-      case "3" : gameMode = "3 player";          break;
-      case "4" : gameMode = "2 AI";              break;
-      case "5" : gameMode = "crazy AI";          break;
-      case "6" : gameMode = "custom";            break;
+        // Game mode selection
+        case "0" : game.settings.gameMode = "singleplayer";      break;
+        case "1" : game.settings.gameMode = "singleplayerVsAI";  break;
+        case "2" : game.settings.gameMode = "2 player";          break;
+        case "3" : game.settings.gameMode = "3 player";          break;
+        case "4" : game.settings.gameMode = "2 AI";              break;
+        case "5" : game.settings.gameMode = "crazy AI";          break;
+        case "6" : game.settings.gameMode = "custom";            break;
 
-      // Other
-      case "SPACE" : newGame(game); game.paused = false; break;
-      case "P"     : game.paused = !game.paused; break;
-      case "+"     : game.step = true; game.paused = false; break;
-      case "?"     : toggleDebug(game.settings.debug); break;
-      case "R"     : gameRepeat = !gameRepeat; console.log("Game repeat: " + gameRepeat); break;
-      case "]"     : if (game.ui.scale < 4) { game.ui.scale *= 2; reSize(game.ui, 2); } break;
-      case "["     : if (game.ui.scale > 1) { game.ui.scale /= 2; reSize(game.ui, 0.5); } break;
+        // Other
+        case "SPACE" : newGame(game); game.paused = false; break;
+        case "P"     : game.paused = !game.paused; break;
+        case "+"     : game.step = true; game.paused = false; break;
+        case "?"     : toggleDebug(game.settings); break;
+        case "R"     : toggleAutoRepeat(game.settings); break;
+        case "]"     : if (game.ui.scale < 4) { game.ui.scale *= 2; reScale(game.ui, 2); } break;
+        case "["     : if (game.ui.scale > 1) { game.ui.scale /= 2; reScale(game.ui, 0.5); } break;
 
     }
 
@@ -181,3 +179,11 @@ export function touched(event) {
 
 // Prevent touch events:
 export function noTouch(event) { event.preventDefault(); }
+
+
+
+// Toggle auto-restarting
+function toggleAutoRepeat(settings) {
+    settings.autoRepeat = !settings.autoRepeat;
+    if (settings.debug) console.log("Game auto-repeat: " + settings.autoRepeat);
+}

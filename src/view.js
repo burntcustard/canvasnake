@@ -11,7 +11,7 @@ var canvas = document.getElementById("canvasnake"),
    * Resizes the canvasnake game.
    * TODO: Resize the rest of the page.
    */
-export function reSize(ui, value) {
+export function reScale(ui, value) {
 
     var canvas = document.getElementById("canvasnake"),
         ctx = canvas.getContext("2d");
@@ -269,9 +269,6 @@ export function render(game) {
           if (snakes[0].score < snakes[1].score) game.wins.AI2++;
         }
 
-        //if (game.settings.autoRepeat === true) newGame();
-        // TODO: Reimplement autoRepeat
-
       }
 
       // Print the snake properties to two big textboxes:
@@ -285,11 +282,12 @@ export function render(game) {
 
 
 
-export function toggleDebug(debug) {
+export function toggleDebug(settings) {
+    
     var infoBoxLeft = document.getElementById("snakeInfoLeft");
     var infoBoxRight = document.getElementById("snakeInfoRight");
 
-    if (debug) {
+    if (settings.debug) {
         infoBoxLeft.style.display = "none";
         infoBoxRight.style.display = "none";
     } else {
@@ -297,6 +295,8 @@ export function toggleDebug(debug) {
         infoBoxRight.style.display = "inline-block";
     }
 
-    debug = !debug;
+    settings.debug = !settings.debug;
+    
+    console.log("Debug: " + settings.debug);
 
 }
