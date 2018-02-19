@@ -59,7 +59,7 @@ export function create(amount, game) {
             if (foodNumber % 5 === 0) { foodType = type.minus; }
             if (foodNumber % 7 === 0) { foodType = type.banana; }
             if (game.settings.debug) {
-              console.log("Created " + foodType + " food with number: " + foodNumber + " at position: " + game.foodArray.length);
+                console.log("Created " + foodType.name + " food with number: " + foodNumber + " at position: " + game.foodArray.length);
             }
         }
 
@@ -105,12 +105,12 @@ export function eat(snake, food, game) {
     var noOfNewFoods = 0; // The amount of new foods that's going to be added.
 
     switch (food.char) {
-      case 'P': snake.speed = Math.round(snake.speed - snake.speed / 8); break;  // Speed up the snake.
-      case 'M': snake.speed = Math.round(snake.speed + snake.speed / 4); break;  // Slow down the snake.
-      case 'B': noOfNewFoods = +3; break;                                        // Add 3 foods to the board.
-      default : throw new Error(
-        snake.name + " tried to eat a " + food.name + " food, but doesn't really know what to do with it ¯\_(ツ)_/¯"
-      );
+        case 'P': snake.speed = Math.round(snake.speed - snake.speed / 8); break;
+        case 'M': snake.speed = Math.round(snake.speed + snake.speed / 4); break;
+        case 'B': noOfNewFoods = +3; break;
+        default : throw new Error(
+            snake.name + " tried to eat a " + food.name + " food, but doesn't really know what to do with it ¯\_(ツ)_/¯"
+        );
     }
 
     // Add 1 to the snakes score (no matter what food was nommed):

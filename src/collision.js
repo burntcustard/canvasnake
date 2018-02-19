@@ -1,12 +1,12 @@
 
 /**
    * Collisions detection algorithm.
-   * @param   {int}   x       - X coordinate
-   * @param   {int}   y       - Y coordinate
-   * @param   {array} targets - Array of X, Y coords. 0 or null checks for wall collisions.
-   * @returns {bool/String}   - Returns true if something bad was collided with.
-   *                            Returns false if nothing collided with.
-   *                            Returns type of food if food was collided with.
+   * @param   {int}   x      - X coordinate
+   * @param   {int}   y      - Y coordinate
+   * @param   {array} target - Array of X, Y coords. Or game.board for wall collisions.
+   * @returns {bool/String}  - Returns true if something bad was collided with.
+   *                           Returns false if nothing collided with.
+   *                           Returns reference to a food if food was collided with.
    */
 export function check(x, y, target) {
 

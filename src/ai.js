@@ -243,7 +243,7 @@ export function update(snake, game) {
     }
 
     if (type === "walls" || !type) {
-      if (checkCollision(xCoord, yCoord, 0)) { return true; }
+      if (checkCollision(xCoord, yCoord, game.board)) { return true; }
     }
 
     return false;

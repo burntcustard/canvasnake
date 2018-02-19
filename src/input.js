@@ -113,9 +113,9 @@ function handleInput(input, game) {
         case "6" : game.settings.gameMode = "custom";            break;
 
         // Other
-        case "SPACE" : newGame(game); game.paused = false; break;
-        case "P"     : game.paused = !game.paused; break;
-        case "+"     : game.step = true; game.paused = false; break;
+        case "SPACE" : newGame(game); game.state.paused = false; break;
+        case "P"     : game.state.paused = !game.state.paused; break;
+        case "+"     : game.step = true; game.state.paused = false; break;
         case "?"     : toggleDebug(game.settings); break;
         case "R"     : toggleAutoRepeat(game.settings); break;
         case "]"     : if (game.ui.scale < 4) { game.ui.scale *= 2; reScale(game.ui, 2); } break;
