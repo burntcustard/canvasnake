@@ -1,5 +1,5 @@
 
-import { create as createFood } from './food.js';
+import { spawnFood } from './food.js';
 import { Snake } from './snake.js';
 
 
@@ -16,7 +16,7 @@ export default function newGame(game) {
     game.results.draw = false;
 
     // Create the first bit of food/s. Could be put in switch (gameMode) if more food is needed.
-    createFood(1, game);
+    spawnFood(game);
 
     // Create new snakes based off the game mode
     switch (game.settings.gameMode) {

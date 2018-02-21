@@ -60,6 +60,20 @@ window.canvasnake = function() {
     game.ui.canvas = canvas;
     game.ui.ctx = ctx;
 
+    
+    game.getCombinedScore = function() {
+        
+        var snakeI = 0,
+            combinedScore = 0;
+        
+        for (snakeI; snakeI < game.snakes.length; snakeI++) {
+            combinedScore += game.snakes[snakeI].score;
+        }
+        
+        return combinedScore;
+        
+    };
+    
 
     game.mainLoopFunc = function mainLoop() {
 

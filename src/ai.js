@@ -324,7 +324,7 @@ export function update(snake, game) {
         tmpGoRight = false,
         viewDistance = { x: game.board.w / 2, y: game.board.h / 2 }, // How far snakes can "see".
         iNS, iNW,
-        iES, iEW, // "iES" is "index East Snake", "iEW" is "inded East Wall".
+        iES, iEW, // "iES" is "index East Snake", "iEW" is "index East Wall".
         iSS, iSW, // Used to loop through the a snakes view distance block by block,
         iWS, iWW; // looking for either a Snake or Wall to avoid.
 
