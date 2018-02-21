@@ -95,11 +95,8 @@ export function get(game, document, canvas) {
 
 function handleInput(input, game) {
 
-    var snakeI,
-        snakes = game.snakes,
-        gameRepeat = game.settings.autoRepeat;
+    var gameRepeat = game.settings.autoRepeat;
 
-    //console.log("Doing something with input");
     game.step = false;
     switch (input) {
 
@@ -118,48 +115,47 @@ function handleInput(input, game) {
         case "+"     : game.step = true; game.state.paused = false; break;
         case "?"     : toggleDebug(game.settings); break;
         case "R"     : toggleAutoRepeat(game.settings); break;
-        case "]"     : if (game.ui.scale < 4) { game.ui.scale *= 2; reScale(game.ui, 2); } break;
-        case "["     : if (game.ui.scale > 1) { game.ui.scale /= 2; reScale(game.ui, 0.5); } break;
+        case "]"     : reScale(game.ui, 2.0); break;
+        case "["     : reScale(game.ui, 0.5); break;
 
     }
 
-    for (snakeI = 0; snakeI < snakes.length; snakeI++) {
-      if (!snakes[snakeI].dead) {
-        //console.log("snake " + snakeI + " isn't dead, trying to move with " + snakes[snakeI].controls);
-        if (snakes[snakeI].controls.indexOf("WASD") > -1) {
-          switch (input) {
-            case "W" : snakes[snakeI].newDirection = "N"; break;
-            case "A" : snakes[snakeI].newDirection = "W"; break;
-            case "S" : snakes[snakeI].newDirection = "S"; break;
-            case "D" : snakes[snakeI].newDirection = "E"; break;
-          }
+    game.snakes.forEach(function(snake) {
+        if (!snake.dead) {
+            if (snake.controls.indexOf("WASD") > -1) {
+              switch (input) {
+                case "W" : snake.newDirection = "N"; break;
+                case "A" : snake.newDirection = "W"; break;
+                case "S" : snake.newDirection = "S"; break;
+                case "D" : snake.newDirection = "E"; break;
+              }
+            }
+            if (snake.controls.indexOf("IJKL") > -1) {
+              switch (input) {
+                case "I" : snake.newDirection = "N"; break;
+                case "J" : snake.newDirection = "W"; break;
+                case "K" : snake.newDirection = "S"; break;
+                case "L" : snake.newDirection = "E"; break;
+              }
+            }
+            if (snake.controls.indexOf("arrows") > -1) {
+              switch (input) {
+                case "UP"   : snake.newDirection = "N"; break;
+                case "LEFT" : snake.newDirection = "W"; break;
+                case "DOWN" : snake.newDirection = "S"; break;
+                case "RIGHT": snake.newDirection = "E"; break;
+              }
+            }
+            if (snake.controls.indexOf("touch") > -1) {
+              switch (input) {
+                case "tUP"   : snake.newDirection = "N"; break;
+                case "tLEFT" : snake.newDirection = "W"; break;
+                case "tDOWN" : snake.newDirection = "S"; break;
+                case "tRIGHT": snake.newDirection = "E"; break;
+              }
+            }
         }
-        if (snakes[snakeI].controls.indexOf("IJKL") > -1) {
-          switch (input) {
-            case "I" : snakes[snakeI].newDirection = "N"; break;
-            case "J" : snakes[snakeI].newDirection = "W"; break;
-            case "K" : snakes[snakeI].newDirection = "S"; break;
-            case "L" : snakes[snakeI].newDirection = "E"; break;
-          }
-        }
-        if (snakes[snakeI].controls.indexOf("arrows") > -1) {
-          switch (input) {
-            case "UP"   : snakes[snakeI].newDirection = "N"; break;
-            case "LEFT" : snakes[snakeI].newDirection = "W"; break;
-            case "DOWN" : snakes[snakeI].newDirection = "S"; break;
-            case "RIGHT": snakes[snakeI].newDirection = "E"; break;
-          }
-        }
-        if (snakes[snakeI].controls.indexOf("touch") > -1) {
-          switch (input) {
-            case "tUP"   : snakes[snakeI].newDirection = "N"; break;
-            case "tLEFT" : snakes[snakeI].newDirection = "W"; break;
-            case "tDOWN" : snakes[snakeI].newDirection = "S"; break;
-            case "tRIGHT": snakes[snakeI].newDirection = "E"; break;
-          }
-        }
-      }
-    }
+    });
 
 }
 

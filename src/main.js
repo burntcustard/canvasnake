@@ -60,20 +60,20 @@ window.canvasnake = function() {
     game.ui.canvas = canvas;
     game.ui.ctx = ctx;
 
-    
+
     game.getCombinedScore = function() {
-        
+
         var snakeI = 0,
             combinedScore = 0;
-        
+
         for (snakeI; snakeI < game.snakes.length; snakeI++) {
             combinedScore += game.snakes[snakeI].score;
         }
-        
+
         return combinedScore;
-        
+
     };
-    
+
 
     game.mainLoopFunc = function mainLoop() {
 
@@ -92,7 +92,7 @@ window.canvasnake = function() {
             }
 
             render(game);
-          
+
             if (game.state.gameOver && game.settings.autoRepeat === true) {
                 newGame(game);
             }
@@ -120,8 +120,8 @@ window.canvasnake = function() {
   }
 
   // Give the stuff being drawn on the canvas a shadow:
-  ctx.shadowColor = "rgba(0,0,0,0.3)";
-  ctx.shadowBlur = 8;
+  ctx.shadowColor = "rgba(0,0,0,0.2)";
+  ctx.shadowBlur = 6;
   ctx.shadowOffsetY = 2;
 
   // Assign touch event (for touch controls) to faded QR code logo if it exists... soon.

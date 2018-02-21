@@ -1,0 +1,134 @@
+/* Thank you Jason Kottke for free font! */
+/* http://www.kottke.org/plus/type/silkscreen/index.html */
+/* Font may have errors when hosted online but works fine using it locally(?) */
+
+@font-face {
+    font-family: 'silkscreen';
+    src: url('slkscr-webfont.ttf') format('truetype');
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+}
+
+a:link {
+    color: DimGray;
+    text-decoration: none;
+}
+
+a:visited {
+    color: DimGray;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+#main-container {
+    margin: auto;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: minmax(10px, 400px) 450px minmax(10px, 400px);
+    grid-template-rows: 450px auto;
+    grid-template-areas:
+        "slider-left game slider-right"
+        ". slider-bottom .";
+}
+
+#game-container {
+    position: relative;
+    grid-area: game;
+    height: 450px;
+    width: 450px;
+    border: 1px solid white;
+    background: white;
+    z-index: 1;
+    overflow: hidden; /* To make SSAA'd canvas not cause scroll bars */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.3);
+}
+
+#canvasnake {
+    transform-origin: top left;
+}
+
+#slider-container-left {
+    grid-area: slider-left;
+}
+
+#slider-container-right {
+    grid-area: slider-right;
+}
+
+.slider {
+    font-family: 'silkscreen';
+    font-size: small;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.slider p {
+    display: block;
+    margin: 0;
+    padding: 15px 10px 0 10px;
+    color: white;
+}
+
+#qr-container, #qr-container-hidden {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    transition: all 0.5s;
+    cursor: pointer;
+    opacity: 1;
+    z-index: 2;
+}
+
+#qr-container-hidden {
+    cursor: auto;
+    opacity: 0.08;
+}
+
+#qr-container img, #qr-container-hidden img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#slider-container-bottom {
+    grid-area: slider-bottom;
+    display: flex;
+    justify-content: center;
+}
+
+#slider-container-bottom .slider {
+    margin: 0px 10px;
+    align-self: flex-start;
+    transform: translateY(calc(-100% + 68px));
+    transition-duration: 0.3s;
+}
+
+#slider-container-bottom .slider:hover {
+    transform: translateY(0);
+}
+
+#slider-mobile {
+    background-color: #32d52b;
+    width: 150px;
+}
+
+#slider-twitter {
+    background-color: #1da1f2;
+    width: 95px;
+    cursor: pointer;
+}
+
+#slider-info {
+    background-color: orangered;
+    width: 64px;
+    cursor: pointer;
+}
+

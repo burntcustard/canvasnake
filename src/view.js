@@ -13,21 +13,31 @@ var canvas = document.getElementById("canvasnake"),
    */
 export function reScale(ui, value) {
 
-    var canvas = document.getElementById("canvasnake"),
-        ctx = canvas.getContext("2d");
+    if ((ui.scale * value > 4) ||
+        (ui.scale * value < 1)) {
+        return false;
+    }
+
+    //var canvas = document.getElementById("canvasnake"),
+    //    ctx = canvas.getContext("2d");
+
+    ui.scale *= value;
+    ui.textSize *= value;
+    ui.cellSize *= value;
 
     if (canvas) {
         canvas.width = (canvas.width * value);
         canvas.height = (canvas.height * value);
+        canvas.style.transform = "scale(" + 1 / ui.scale + ")";
     }
 
-    ui.textSize *= value;
-    ui.cellSize *= value;
-    ctx.shadowColor = "rgba(0,0,0,0.3)";
-    ctx.shadowBlur = 8 * value;
-    ctx.shadowOffsetY = 2 * value;
+    ui.ctx.shadowColor = "rgba(0,0,0,0.2)";
+    ui.ctx.shadowBlur = 6 * ui.scale;
+    ui.ctx.shadowOffsetY = 2 * ui.scale;
+
     ui.redrawGameOver = true;
 }
+
 
 
 // Paint a square slightly smaller than cSize to make a 1px border around the edge
@@ -231,7 +241,7 @@ export function render(game) {
     // If you died this update, stop touch, start it again after 0.5s, and show dead message.
     if (game.results.winner && (game.state.finalUpdate && !game.state.gameOver) || (game.ui.redrawEnd && game.state.gameOver)) {
         game.ui.redrawEnd = false;
-        var qrContainer = document.getElementById("qrContainerHid");
+        var qrContainer = document.getElementById("qr-container-hidden");
         if (qrContainer) {
             qrContainer.removeEventListener("touchstart", touched);
             qrContainer.addEventListener   ("touchstart", noTouch);
@@ -283,7 +293,7 @@ export function render(game) {
 
 
 export function toggleDebug(settings) {
-    
+
     var infoBoxLeft = document.getElementById("snakeInfoLeft");
     var infoBoxRight = document.getElementById("snakeInfoRight");
 
@@ -296,7 +306,7 @@ export function toggleDebug(settings) {
     }
 
     settings.debug = !settings.debug;
-    
+
     console.log("Debug: " + settings.debug);
 
 }

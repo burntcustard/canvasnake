@@ -4,13 +4,13 @@ import {check as checkCollision} from './collision.js';
 
 
 function Food(game) {
-    
+
     this.foodArray = game.foodArray;
     this.isFood = true;
-    
+
     var validFood,
         failedFoodCount = 0;
-    
+
     // Place food in a random grid location on the game board:
     do {
         validFood = true;
@@ -31,13 +31,13 @@ function Food(game) {
         if (!validFood) { failedFoodCount++; }
         if (failedFoodCount > 99) { throw new Error("Failed to create new food. (╯°□°）╯︵ ┻━┻"); }
     } while (!validFood);
-    
+
     game.foodArray.push(this);
-    
+
 }
 
 Food.prototype.getEatenBy = function(snake) {
-    
+
     // Add 1 to the snakes score (no matter what food was nommed):
     snake.score++;
 
@@ -45,7 +45,7 @@ Food.prototype.getEatenBy = function(snake) {
     snake.movesSinceNommed = 0;
 
     // Remove eaten food from the game:
-    this.foodArray.splice(this, 1);
+    this.foodArray.splice(this.foodArray.indexOf(this), 1);
 
 };
 
@@ -69,7 +69,7 @@ function PlusFood(game) {
 function MinusFood(game) {
     Food.call(this, game);
     this.name = "Minus Food";
-    this.color = "green";
+    this.color = "#32d52b";
     this.getEatenBy = function(snake) {
         snake.speed = Math.round(snake.speed + snake.speed / 4);
         Food.prototype.getEatenBy.call(this, snake);
@@ -108,11 +108,11 @@ function BananaFood(game) {
  * @param {object} game Reference to the game object.
  */
 export function spawnFood(game) {
-    
+
     var combinedScore = game.getCombinedScore(),
         foodNumber,
         newFood;
-    
+
     // If it's not the first food of the game (i.e. a player has at least one point),
     // maybe change the food being created to "Minus speed" or "Banana" food:
     if (combinedScore > 0) {
@@ -124,9 +124,9 @@ export function spawnFood(game) {
     if (!newFood) {
         newFood = new PlusFood(game);
     }
-    
+
     if (game.settings.debug) {
         console.log("Created " + newFood.name + " with number: " + foodNumber + " at position: " + newFood.x + "," + newFood.y);
     }
-    
+
 }

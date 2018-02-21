@@ -5,11 +5,11 @@ var canvasnakeRunning = false;
 
 function removeQr(event) {
     event.preventDefault();
-    var qrContainer = document.getElementById("qrContainer");
+    var qrContainer = document.getElementById("qr-container");
     //console.log("Hiding QR container because It's being poked");
     qrContainer.removeEventListener("touchstart", removeQr, false);
     qrContainer.removeEventListener("click", removeQr, false);
-    qrContainer.setAttribute("id", "qrContainerHid");
+    qrContainer.setAttribute("id", "qr-container-hidden");
     if (!canvasnakeRunning) {
         canvasnakeRunning = true;
         window.canvasnake();
@@ -21,9 +21,9 @@ function removeQr(event) {
 // Start game when the page loads and...
 // Show the QR code when the link in the tab is clicked
 function init() {
-    var qrContainerHid = document.getElementById("qrContainerHid");
-    if (qrContainerHid) qrContainerHid.setAttribute("id", "qrContainer");
-    var qrContainer = document.getElementById("qrContainer");
+    var qrContainerHidden = document.getElementById("qr-container-hidden");
+    if (qrContainerHidden) qrContainerHidden.setAttribute("id", "qr-container");
+    var qrContainer = document.getElementById("qr-container");
     if (qrContainer) qrContainer.addEventListener("touchstart", removeQr);
     if (qrContainer) qrContainer.addEventListener("click", removeQr);
 }
@@ -33,7 +33,7 @@ function init() {
 function shareScore() {
     var twitter = "https://twitter.com/home/?status=";
     //https://twitter.com/share?url=https%3A%2F%2Fdev.twitter.com%2Fweb%2Ftweet-button
-    var tweetScore = "I scored "+localStorage.highScore+" at tiny.cc/canvasnake!";
+    var tweetScore = "I scored "+localStorage.highScore+" at burnt.io/canvasnake!";
     window.open(twitter+tweetScore,"_blank");
 }
 
