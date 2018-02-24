@@ -1,6 +1,6 @@
 
-
 var canvasnakeRunning = false;
+
 
 
 function removeQr(event) {
@@ -48,5 +48,32 @@ function toggleInfo() {
         infoBox.setAttribute("id", "sliderInfoBox");
     }
 }
+
+
+
+function toggleMenu() {
+    var menu;
+    if ((menu = document.getElementById("slider-menu"))) {
+        menu.setAttribute("id", "slider-menu-collapsed");
+    } else if ((menu = document.getElementById("slider-menu-collapsed"))) {
+        menu.setAttribute("id", "slider-menu");
+    }
+}
+
+
+
+function updateSSAAMenuItem(value) {
+
+    let text = "<span>SSAA: " + value + "</span>";
+
+    if (value === 1) {
+        text += " <small>(default)</small>";
+    }
+
+    document.getElementById("SSAA").innerHTML = text;
+
+}
+
+
 
 window.onload = function() { init(); };

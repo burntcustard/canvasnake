@@ -1,9 +1,20 @@
 
+import { SSAA } from './ssaa.js';
 import * as input from './input.js';
 import newGame from './newGame.js';
-import { render } from './view.js';
+import { render, reScale } from './view.js';
 import { update } from './update.js';
 import { snakeInfo as snakeInfo } from './infoString.js';
+
+
+
+window.reScaleGame = reScale;
+window.ssaa = SSAA;
+
+
+
+// Todo: Figure out how to do everything without making game a global variable eesh.
+window.game = {};
 
 
 
@@ -15,6 +26,7 @@ window.canvasnake = function() {
         settings: {
             debug: false,        // Enable/disables console log messages.
             autoRepeat:  false,  // Restarts the game automatically when gameover occurs.
+            ssaa: window.ssaa,            // Supersampling anti-aliasing.
             gameMode: "singleplayerVsAI" // Initial gamemode is 1 human player against 1 AI.
         },
 
@@ -59,7 +71,6 @@ window.canvasnake = function() {
 
     game.ui.canvas = canvas;
     game.ui.ctx = ctx;
-
 
     game.getCombinedScore = function() {
 
@@ -109,7 +120,7 @@ window.canvasnake = function() {
         }
     };
 
-
+    window.game = game;
 
   // Check if the canvas' size is set correctly:
   if (canvas.width % game.ui.cellSize === 0 || canvas.height % game.ui.cellSize === 0) {
@@ -119,10 +130,9 @@ window.canvasnake = function() {
     throw new Error("Canvas width and height must be divisible by " + game.ui.cellSize + " without remainder.");
   }
 
-  // Give the stuff being drawn on the canvas a shadow:
-  ctx.shadowColor = "rgba(0,0,0,0.2)";
-  ctx.shadowBlur = 6;
-  ctx.shadowOffsetY = 2;
+    // Set the scale, shadow size, etc.:
+    //console.log(game.settings.ssaa);
+    game.settings.ssaa.set();
 
   // Assign touch event (for touch controls) to faded QR code logo if it exists... soon.
   var qrContainer = document.getElementById("qrCode");

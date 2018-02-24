@@ -1,6 +1,11 @@
 
+/*global ssaa*/
+
+
+
 import newGame from './newGame.js';
 import { toggleDebug, reScale } from './view.js';
+
 
 
 // Touchscreen variables:
@@ -115,8 +120,8 @@ function handleInput(input, game) {
         case "+"     : game.step = true; game.state.paused = false; break;
         case "?"     : toggleDebug(game.settings); break;
         case "R"     : toggleAutoRepeat(game.settings); break;
-        case "]"     : reScale(game.ui, 2.0); break;
-        case "["     : reScale(game.ui, 0.5); break;
+        case "]"     : ssaa.increment(); break;
+        case "["     : ssaa.decrement(); break;
 
     }
 

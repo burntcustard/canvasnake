@@ -1,7 +1,13 @@
+
+:root {
+    --green: #32d52b;
+    --blue: #1da1f2;
+    --menu-width: 220px;
+}
+
 /* Thank you Jason Kottke for free font! */
 /* http://www.kottke.org/plus/type/silkscreen/index.html */
-/* Font may have errors when hosted online but works fine using it locally(?) */
-
+/* Font has errors when hosted online but works fine using it locally(?) */
 @font-face {
     font-family: 'silkscreen';
     src: url('slkscr-webfont.ttf') format('truetype');
@@ -11,31 +17,40 @@ body {
     margin: 0;
     height: 100vh;
     display: flex;
+    font-family: 'silkscreen';
+    font-size: small;
+    color: white;
+    text-shadow: 0px 1px 4px rgba(0,0,0,0.2);
+    user-select: none;  /* Selectable text must overwrite this */
 }
 
-a:link {
+a:link, a:visited {
     color: DimGray;
     text-decoration: none;
-}
-
-a:visited {
-    color: DimGray;
 }
 
 a:hover {
     text-decoration: underline;
 }
 
+/* Align small text vertically center */
+small {
+    vertical-align: middle;
+}
+
 #main-container {
     margin: auto;
-    padding: 10px;
     display: grid;
-    grid-template-columns: minmax(10px, 400px) 450px minmax(10px, 400px);
-    grid-template-rows: 450px auto;
+    grid-template-columns: auto 452px auto;
+    grid-template-rows: 452px auto;
     grid-template-areas:
         "slider-left game slider-right"
         ". slider-bottom .";
 }
+
+
+
+/******** Game ********/
 
 #game-container {
     position: relative;
@@ -46,33 +61,12 @@ a:hover {
     background: white;
     z-index: 1;
     overflow: hidden; /* To make SSAA'd canvas not cause scroll bars */
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.3);
+    box-shadow: 0 1px 7px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.4);
 }
 
 #canvasnake {
+    /* So SSAA-ing doesn't move it incorrectly */
     transform-origin: top left;
-}
-
-#slider-container-left {
-    grid-area: slider-left;
-}
-
-#slider-container-right {
-    grid-area: slider-right;
-}
-
-.slider {
-    font-family: 'silkscreen';
-    font-size: small;
-    text-align: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.2);
-}
-
-.slider p {
-    display: block;
-    margin: 0;
-    padding: 15px 10px 0 10px;
-    color: white;
 }
 
 #qr-container, #qr-container-hidden {
@@ -98,30 +92,144 @@ a:hover {
     transform: translate(-50%, -50%);
 }
 
-#slider-container-bottom {
-    grid-area: slider-bottom;
+
+
+/******** Generic sliders & contents ********/
+
+.slider-container {
     display: flex;
-    justify-content: center;
 }
 
-#slider-container-bottom .slider {
-    margin: 0px 10px;
-    align-self: flex-start;
-    transform: translateY(calc(-100% + 68px));
+.slider-container img {
+    filter: drop-shadow(0px 1px 3px rgba(0,0,0,0.2));
+}
+
+#slider-container-left {
+    grid-area: slider-left;
+}
+
+#slider-container-right {
+    grid-area: slider-right;
+}
+
+.slider {
+    box-shadow: 0 1px 6px rgba(0,0,0,0.2), 0 1px 1px rgba(0,0,0,0.3);
     transition-duration: 0.3s;
 }
 
-#slider-container-bottom .slider:hover {
+.slider:hover {
+    box-shadow: 0 3px 9px rgba(0,0,0,0.2), 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.side.slider {
+    margin: 30px 0px;
+    transition-duration: 0.1s;
+}
+
+.side.slider > .content {
+    transition-duration: 0.3s;
+    position: relative;
+}
+
+#slider-menu > .content  {
+    width: var(--menu-width);
+}
+
+#slider-menu-collapsed > .content {
+    width: 0;
+}
+
+#slider-menu-collapsed:hover{
+    padding-left: 5px;
+}
+
+.slider.menu ul {
+    margin: 0;
+    list-style-type: none;
+    padding: 15px 10px;
+    box-sizing: border-box;
+    position: absolute;
+    right: 0;
+    width: var(--menu-width);
+}
+
+.slider.menu .content > ul li {
+    font-size: large;
+    padding: 10px;
+}
+
+.slider.menu .content ul li:hover {
+    cursor: pointer;
+}
+
+.slider.menu .content ul li:hover > .menu-item > span {
+    text-decoration: underline;
+}
+
+.slider.menu .content ul li .description {
+    font-size: x-small;
+    margin: 2px;
+    padding-left: 1em;
+}
+
+.slider.menu .content ul li .description::before {
+    display: inline-block;
+    content: "-";
+    width: 1em;
+    margin-left: -1em;
+}
+
+.right.side.slider {
+    background-color: var(--green);
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.side.slider > .button {
+    cursor: pointer;
+    width: 2em; /* Height of button font size */
+    padding: 4px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.side.slider > .button > span {
+    font-size: 2em;
+    transform: translateX(-1em) rotate(90deg);*/
+    transition-duration: 0.3s;
+    padding-top: 1px; /* Adjusting 'cause the font used 1px off... */
+}
+
+.slider.bottom > p {
+    display: block;
+    margin: 0;
+    padding: 16px 10px 1px 10px;
+}
+
+#slider-container-bottom {
+    grid-area: slider-bottom;
+    justify-content: center;
+}
+
+.bottom.slider {
+    margin: 0px 10px;
+    align-self: flex-start;
+    transform: translateY(calc(-100% + 70px));
+    text-align: center;
+}
+
+.bottom.slider:hover {
     transform: translateY(0);
 }
 
 #slider-mobile {
-    background-color: #32d52b;
+    background-color: var(--green);
     width: 150px;
 }
 
 #slider-twitter {
-    background-color: #1da1f2;
+    background-color: var(--blue);
     width: 95px;
     cursor: pointer;
 }
@@ -131,4 +239,3 @@ a:hover {
     width: 64px;
     cursor: pointer;
 }
-

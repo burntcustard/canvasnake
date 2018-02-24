@@ -1,11 +1,11 @@
 
+/*global updateSSAAMenuItem, gameScale:true */
+
+
+
 import { touched, noTouch } from './input.js';
 import { snakeInfo } from './infoString.js';
 
-
-
-var canvas = document.getElementById("canvasnake"),
-    ctx = canvas.getContext("2d");
 
 /**
    * Resizes the canvasnake game.
@@ -13,37 +13,35 @@ var canvas = document.getElementById("canvasnake"),
    */
 export function reScale(ui, value) {
 
-    if ((ui.scale * value > 4) ||
-        (ui.scale * value < 1)) {
-        return false;
-    }
+    var multiplier = value / ui.scale;
+    
+    ui.scale *= multiplier;
+    ui.textSize *= multiplier;
+    ui.cellSize *= multiplier;
 
-    //var canvas = document.getElementById("canvasnake"),
-    //    ctx = canvas.getContext("2d");
-
-    ui.scale *= value;
-    ui.textSize *= value;
-    ui.cellSize *= value;
-
-    if (canvas) {
-        canvas.width = (canvas.width * value);
-        canvas.height = (canvas.height * value);
-        canvas.style.transform = "scale(" + 1 / ui.scale + ")";
+    if (ui.canvas) {
+        ui.canvas.width *= multiplier;
+        ui.canvas.height *= multiplier;
+        ui.canvas.style.transform = "scale(" + 1 / ui.scale + ")";
     }
 
     ui.ctx.shadowColor = "rgba(0,0,0,0.2)";
     ui.ctx.shadowBlur = 6 * ui.scale;
     ui.ctx.shadowOffsetY = 2 * ui.scale;
 
-    ui.redrawGameOver = true;
+    ui.redrawEnd = true;
+
+    // Return the new scale in case we need to do anything else with it:
+    return ui.scale;
+
 }
 
 
 
 // Paint a square slightly smaller than cSize to make a 1px border around the edge
 function paintCell(ui, color, x, y) {
-    ctx.fillStyle = color;
-    ctx.fillRect(
+    ui.ctx.fillStyle = color;
+    ui.ctx.fillRect(
         x * ui.cellSize + 1 * ui.scale,
         y * ui.cellSize + 1 * ui.scale,
         ui.cellSize - 2 * ui.scale,
@@ -55,8 +53,8 @@ function paintCell(ui, color, x, y) {
 
 // Paint a square slightly smaller than paintCell
 function paintSmallCell(ui, color, x, y) {
-    ctx.fillStyle = color;
-    ctx.fillRect(
+    ui.ctx.fillStyle = color;
+    ui.ctx.fillRect(
         x * ui.cellSize + 3 * ui.scale,
         y * ui.cellSize + 3 * ui.scale,
         ui.cellSize - 6 * ui.scale,
@@ -67,7 +65,7 @@ function paintSmallCell(ui, color, x, y) {
 
 
 function drawTongueSection(ui, head, offsetX, offsetY, x, y, w, h) {
-    ctx.fillRect(
+    ui.ctx.fillRect(
         ((head.x + offsetX) * ui.cellSize + x * ui.scale),
         ((head.y + offsetY) * ui.cellSize + y * ui.scale),
         w * ui.scale,
@@ -85,7 +83,7 @@ function drawSnake(ui, snake) {
     // Render tongue
     if (!snake.dead) { // Only show tongue if not dead
       var head = snake.coords[0];
-      ctx.fillStyle = ui.textColor; // orangeRed
+      ui.ctx.fillStyle = ui.textColor; // orangeRed
       if (snake.direction === 'N') {
         drawTongueSection( ui, head, 0, 0,  6, -7, 3, 6);
         drawTongueSection( ui, head, 0, 0,  4,-10, 3, 6);
@@ -121,29 +119,29 @@ function drawSnake(ui, snake) {
     if (snake.ai.difficulty !== "no AI") { // Only show fancy head if not dead and is an AI
 
       // White hole (would need to fill color if background not white)
-      ctx.clearRect(snake.coords[0].x * cSize + 5*sf, snake.coords[0].y * cSize + 5*sf, 5*sf, 5*sf);
+      ui.ctx.clearRect(snake.coords[0].x * cSize + 5*sf, snake.coords[0].y * cSize + 5*sf, 5*sf, 5*sf);
 
       // Black antenna
-      ctx.fillStyle = "black";
+      ui.ctx.fillStyle = "black";
       if (snake.direction === 'N' || snake.direction === 'S') {
-        ctx.fillRect(snake.coords[0].x * cSize - 2*sf, snake.coords[0].y * cSize + 4*sf, 3*sf, 2*sf); // Up Dot
-        ctx.fillRect(snake.coords[0].x * cSize - 4*sf, snake.coords[0].y * cSize + 8*sf, 5*sf, 2*sf); // Down Dot
+        ui.ctx.fillRect(snake.coords[0].x * cSize - 2*sf, snake.coords[0].y * cSize + 4*sf, 3*sf, 2*sf); // Up Dot
+        ui.ctx.fillRect(snake.coords[0].x * cSize - 4*sf, snake.coords[0].y * cSize + 8*sf, 5*sf, 2*sf); // Down Dot
       } else {
-        ctx.fillRect(snake.coords[0].x * cSize + 4*sf, snake.coords[0].y * cSize - 2*sf, 2*sf, 3*sf); // L Dot
-        ctx.fillRect(snake.coords[0].x * cSize + 8*sf, snake.coords[0].y * cSize - 4*sf, 2*sf, 5*sf); // R Dot
+        ui.ctx.fillRect(snake.coords[0].x * cSize + 4*sf, snake.coords[0].y * cSize - 2*sf, 2*sf, 3*sf); // L Dot
+        ui.ctx.fillRect(snake.coords[0].x * cSize + 8*sf, snake.coords[0].y * cSize - 4*sf, 2*sf, 5*sf); // R Dot
       }
 
       if (!snake.dead) {
         // Red bits: end of antenna, eye.
-        ctx.fillStyle = ui.textColor; // (orangered)
+        ui.ctx.fillStyle = ui.textColor; // (orangered)
         if (snake.direction === 'N' || snake.direction === 'S') {
-          ctx.fillRect(snake.coords[0].x * cSize + 6*sf, snake.coords[0].y * cSize + 4*sf, 3*sf, 7*sf); // Eye
-          ctx.fillRect(snake.coords[0].x * cSize - 4*sf, snake.coords[0].y * cSize + 4*sf, 2*sf, 2*sf); // L Dot
-          ctx.fillRect(snake.coords[0].x * cSize - 6*sf, snake.coords[0].y * cSize + 8*sf, 2*sf, 2*sf); // R Dot
+          ui.ctx.fillRect(snake.coords[0].x * cSize + 6*sf, snake.coords[0].y * cSize + 4*sf, 3*sf, 7*sf); // Eye
+          ui.ctx.fillRect(snake.coords[0].x * cSize - 4*sf, snake.coords[0].y * cSize + 4*sf, 2*sf, 2*sf); // L Dot
+          ui.ctx.fillRect(snake.coords[0].x * cSize - 6*sf, snake.coords[0].y * cSize + 8*sf, 2*sf, 2*sf); // R Dot
         } else {
-          ctx.fillRect(snake.coords[0].x * cSize + 4*sf, snake.coords[0].y * cSize + 6*sf, 7*sf, 3*sf); // Eye
-          ctx.fillRect(snake.coords[0].x * cSize + 4*sf, snake.coords[0].y * cSize - 4*sf, 2*sf, 2*sf); // L Dot
-          ctx.fillRect(snake.coords[0].x * cSize + 8*sf, snake.coords[0].y * cSize - 6*sf, 2*sf, 2*sf); // R Dot
+          ui.ctx.fillRect(snake.coords[0].x * cSize + 4*sf, snake.coords[0].y * cSize + 6*sf, 7*sf, 3*sf); // Eye
+          ui.ctx.fillRect(snake.coords[0].x * cSize + 4*sf, snake.coords[0].y * cSize - 4*sf, 2*sf, 2*sf); // L Dot
+          ui.ctx.fillRect(snake.coords[0].x * cSize + 8*sf, snake.coords[0].y * cSize - 6*sf, 2*sf, 2*sf); // R Dot
         }
       }
 
@@ -164,17 +162,17 @@ function drawSnake(ui, snake) {
  */
 function write(ui, size, xAlign, yAlign, output, x, y) {
 
-    ctx.fillStyle = (ui.textColor);
-    ctx.font = (size + "px silkscreen");
-    ctx.textAlign = (xAlign);
-    ctx.textBaseline = (yAlign);
+    ui.ctx.fillStyle = (ui.textColor);
+    ui.ctx.font = (size + "px silkscreen");
+    ui.ctx.textAlign = (xAlign);
+    ui.ctx.textBaseline = (yAlign);
 
-    var lineHeight = ctx.measureText("M").width * 1.2,
+    var lineHeight = ui.ctx.measureText("M").width * 1.2,
         lines = output.split("<br>"),
         l;
 
     for (l = 0; l < lines.length; l++) {
-        ctx.fillText(lines[l], x, y);
+        ui.ctx.fillText(lines[l], x, y);
         y += lineHeight;
     }
 
@@ -190,11 +188,11 @@ export function render(game) {
         textSizeM = ui.textSize,
         textSizeL = ui.textSize * 2,
         sf = ui.scale,
-        w = canvas.width,
-        h = canvas.height;
+        w = ui.canvas.width,
+        h = ui.canvas.height;
 
     // Clear entire canvas:
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ui.ctx.clearRect(0, 0, ui.canvas.width, ui.canvas.height);
 
     // Draw food:
     for(var j = 0; j < game.foodArray.length; j++) {
@@ -217,7 +215,7 @@ export function render(game) {
             "bottom",
             ("Score: " +snakes[snakeI].score),
             (snakeI * 100 * sf + 4 * sf),
-            canvas.height - 2 * sf
+            ui.canvas.height - 2 * sf
         );
     }
 
@@ -228,8 +226,8 @@ export function render(game) {
         "right",
         "bottom",
         ("Highscore: " +game.highScore),
-        canvas.width - 5 * sf ,
-        canvas.height - 2 * sf
+        ui.canvas.width - 5 * sf ,
+        ui.canvas.height - 2 * sf
     );
 
     // Draw debug squares:
@@ -239,8 +237,8 @@ export function render(game) {
 
 
     // If you died this update, stop touch, start it again after 0.5s, and show dead message.
-    if (game.results.winner && (game.state.finalUpdate && !game.state.gameOver) || (game.ui.redrawEnd && game.state.gameOver)) {
-        game.ui.redrawEnd = false;
+    if (game.results.winner && (game.state.finalUpdate && !game.state.gameOver) || (ui.redrawEnd && game.state.gameOver)) {
+        ui.redrawEnd = false;
         var qrContainer = document.getElementById("qr-container-hidden");
         if (qrContainer) {
             qrContainer.removeEventListener("touchstart", touched);
