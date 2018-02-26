@@ -9,64 +9,66 @@ import { snakeInfo as snakeInfo } from './infoString.js';
 
 
 window.reScaleGame = reScale;
-window.ssaa = SSAA;
 
 
 
 // Todo: Figure out how to do everything without making game a global variable eesh.
-window.game = {};
+window.game = {
+
+    settings: {
+        debug: false,        // Enable/disables console log messages.
+        autoRepeat:  false,  // Restarts the game automatically when gameover occurs.
+        ssaa: SSAA,            // Supersampling anti-aliasing.
+        gameMode: "Single player vs AI" // Initial gamemode is 1 human player against 1 AI.
+    },
+
+    state: {
+        finalUpdate: false,  // Becomes true when all snakes are dead.
+        gameOver:    false,
+        running:     false,
+        paused:      false
+    },
+
+    ui: {
+        textSize: 16,  // Base font size. Large font is "textSize * 2"
+        cellSize: 15,  // Diameter of square cell in grid in pixels
+        scale: 1,      // "Scale factor" used to scale (1x, 2x, size etc.)
+        bgColor: "white",
+        textColor: "orangered",
+        redrawEnd: false  // Used to indicate that the game over message should be redrawn.
+    },
+
+    results: {
+        winner: null,
+        draw: false
+    },
+
+    // Other stuff. TODO: Cleanup into catagories if needed
+    step: false,  // Runs one "turn" (all players move one cell) then pauses.
+    updateInterval: 0, // How frequently the turns occur in ms (lower number = faster).
+    board: {w: 0, h: 0}, // Current grid/board setup is 0 to 29 (inclusive), so 30x30
+
+    highScore: 0,   // Holds the highest score accomplished on that PC/web browers.
+    snakes: [],     // Array of snake objects that are on the board (human player snakes and/or AI snakes).
+    foodArray: [],  // Array of foods that are on the board
+    debugSquares: [],
+
+    gameLoop: null,
+
+    wins: {AI1: 0, AI2: 0},
+
+    newGame: newGame
+
+};
 
 
 
 window.canvasnake = function() {
 
     // Global-ish variables (too many?):
-    var game = {
+    var game = window.game;
 
-        settings: {
-            debug: false,        // Enable/disables console log messages.
-            autoRepeat:  false,  // Restarts the game automatically when gameover occurs.
-            ssaa: window.ssaa,            // Supersampling anti-aliasing.
-            gameMode: "singleplayerVsAI" // Initial gamemode is 1 human player against 1 AI.
-        },
-
-        state: {
-            finalUpdate: false,  // Becomes true when all snakes are dead.
-            gameOver:    false,
-            paused:      false
-        },
-
-        ui: {
-            textSize: 16,  // Base font size. Large font is "textSize * 2"
-            cellSize: 15,  // Diameter of square cell in grid in pixels
-            scale: 1,      // "Scale factor" used to scale (1x, 2x, size etc.)
-            bgColor: "white",
-            textColor: "orangered",
-            redrawEnd: false  // Used to indicate that the game over message should be redrawn.
-        },
-
-        results: {
-            winner: null,
-            draw: false
-        },
-
-        // Other stuff. TODO: Cleanup into catagories if needed
-        step: false,  // Runs one "turn" (all players move one cell) then pauses.
-        updateInterval: 0, // How frequently the turns occur in ms (lower number = faster).
-        board: {w: 0, h: 0}, // Current grid/board setup is 0 to 29 (inclusive), so 30x30
-
-        highScore: 0,   // Holds the highest score accomplished on that PC/web browers.
-        snakes: [],     // Array of snake objects that are on the board (human player snakes and/or AI snakes).
-        foodArray: [],  // Array of foods that are on the board
-        debugSquares: [],
-
-        gameLoop: null,
-
-        wins: {AI1: 0, AI2: 0}
-
-    };
-
-    var canvas = document.getElementById("canvasnake"),
+    var canvas = document.getElementById("game"),
         ctx = canvas.getContext("2d");
 
     game.ui.canvas = canvas;
@@ -121,6 +123,7 @@ window.canvasnake = function() {
     };
 
     window.game = game;
+    game.state.running = true;
 
   // Check if the canvas' size is set correctly:
   if (canvas.width % game.ui.cellSize === 0 || canvas.height % game.ui.cellSize === 0) {

@@ -19,7 +19,7 @@ export default function newGame(game) {
     spawnFood(game);
 
     // Create new snakes based off the game mode
-    switch (game.settings.gameMode) {
+    switch (game.settings.gameMode.toLowerCase()) {
 
         /*** EXAMPLE OF A GAMEMODE ***
         case "name of game mode" :
@@ -37,7 +37,21 @@ export default function newGame(game) {
         break;
         *** END OF EXAMPLE ***/
 
-        case "singleplayerVsAI" :
+        case "single player" :
+            game.snakes = [
+                new Snake(
+                    "Player 1",
+                    null,
+                    200,
+                    null,
+                    ["arrows","WASD","touch"],
+                    'S',
+                    [{x: 10, y: 7}, {x: 10, y: 6}, {x: 10, y: 5}]
+                )
+            ];
+        break;
+
+        case "single player vs ai" :
             game.snakes = [
                 new Snake(
                     "Player 1",
@@ -60,7 +74,7 @@ export default function newGame(game) {
             ];
         break;
 
-        case "2 player" :
+        case "two player" :
             game.snakes = [
                 new Snake(
                     "Player 1",
@@ -83,7 +97,7 @@ export default function newGame(game) {
             ];
         break;
 
-        case "3 player" :
+        case "three player" :
             game.snakes = [
                 new Snake(
                     "Black",
@@ -115,7 +129,7 @@ export default function newGame(game) {
             ];
         break;
 
-        case "2 AI" :
+        case "ai vs ai" :
             game.snakes = [
                 new Snake(
                     "AI 1",
@@ -153,20 +167,6 @@ export default function newGame(game) {
                     [randomStart]
                 ));
             }
-        break;
-
-        case "singleplayer" :
-            game.snakes = [
-                new Snake(
-                    "Player 1",
-                    null,
-                    200,
-                    null,
-                    ["arrows","WASD","touch"],
-                    'S',
-                    [{x: 10, y: 7}, {x: 10, y: 6}, {x: 10, y: 5}]
-                )
-            ];
         break;
 
     }

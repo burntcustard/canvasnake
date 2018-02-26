@@ -1,5 +1,5 @@
 
-/*global ssaa*/
+/*global toggleAutoRepeat, setGameMode*/
 
 
 
@@ -75,7 +75,7 @@ export function get(game, document, canvas) {
             // Other
             case  32: input = "SPACE"; break;
             case  80: input = "P";     break;
-            case 187: input = "+";     break;
+            case  78: input = "N";     break;
             case 191: input = "?";     break;
             case  82: input = "R";     break;
             case 219: input = "[";     break;
@@ -106,22 +106,22 @@ function handleInput(input, game) {
     switch (input) {
 
         // Game mode selection
-        case "0" : game.settings.gameMode = "singleplayer";      break;
-        case "1" : game.settings.gameMode = "singleplayerVsAI";  break;
-        case "2" : game.settings.gameMode = "2 player";          break;
-        case "3" : game.settings.gameMode = "3 player";          break;
-        case "4" : game.settings.gameMode = "2 AI";              break;
-        case "5" : game.settings.gameMode = "crazy AI";          break;
-        case "6" : game.settings.gameMode = "custom";            break;
+        case "0" : setGameMode("single Player");       break;
+        case "1" : setGameMode("Single Player vs AI"); break;
+        case "2" : setGameMode("Two Player");          break;
+        case "3" : setGameMode("Three Player");        break;
+        case "4" : setGameMode("AI vs AI");            break;
+        case "5" : setGameMode("Crazy AI");            break;
+        case "6" : setGameMode("Custom");              break;
 
         // Other
         case "SPACE" : newGame(game); game.state.paused = false; break;
         case "P"     : game.state.paused = !game.state.paused; break;
-        case "+"     : game.step = true; game.state.paused = false; break;
+        case "N"     : game.step = true; game.state.paused = false; break;
         case "?"     : toggleDebug(game.settings); break;
-        case "R"     : toggleAutoRepeat(game.settings); break;
-        case "]"     : ssaa.increment(); break;
-        case "["     : ssaa.decrement(); break;
+        case "R"     : toggleAutoRepeat(); break;
+        case "]"     : game.settings.ssaa.increment(); break;
+        case "["     : game.settings.ssaa.decrement(); break;
 
     }
 
@@ -180,11 +180,3 @@ export function touched(event) {
 
 // Prevent touch events:
 export function noTouch(event) { event.preventDefault(); }
-
-
-
-// Toggle auto-restarting
-function toggleAutoRepeat(settings) {
-    settings.autoRepeat = !settings.autoRepeat;
-    if (settings.debug) console.log("Game auto-repeat: " + settings.autoRepeat);
-}

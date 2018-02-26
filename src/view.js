@@ -14,7 +14,7 @@ import { snakeInfo } from './infoString.js';
 export function reScale(ui, value) {
 
     var multiplier = value / ui.scale;
-    
+
     ui.scale *= multiplier;
     ui.textSize *= multiplier;
     ui.cellSize *= multiplier;
@@ -292,6 +292,7 @@ export function render(game) {
 
 export function toggleDebug(settings) {
 
+    /*
     var infoBoxLeft = document.getElementById("snakeInfoLeft");
     var infoBoxRight = document.getElementById("snakeInfoRight");
 
@@ -302,7 +303,7 @@ export function toggleDebug(settings) {
         infoBoxLeft.style.display = "inline-block";
         infoBoxRight.style.display = "inline-block";
     }
-
+    */
     settings.debug = !settings.debug;
 
     console.log("Debug: " + settings.debug);

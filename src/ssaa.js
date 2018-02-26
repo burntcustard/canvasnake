@@ -2,6 +2,7 @@
 /*global updateSSAAMenuItem*/
 
 
+
 export const SSAA = {
     current: 1,
     default: 1,
@@ -9,9 +10,8 @@ export const SSAA = {
     MAX: 4,
     
     set: function() {
-        let ui = window.game.ui;
-        if (ui) {
-            window.reScaleGame(ui, this.current);
+        if (window.game.state.running) {
+            window.reScaleGame(window.game.ui, this.current);
         }
         updateSSAAMenuItem(this.current);  // Update the SSAA menu item.
     },

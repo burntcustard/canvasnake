@@ -1,8 +1,15 @@
 
+/* === GLOBAL === */
+
 :root {
     --green: #32d52b;
-    --blue: #1da1f2;
-    --menu-width: 220px;
+    --blue: #1da1f2;  /* Official Twitter blue (25-Feb-2018) */
+    --red: OrangeRed;
+    --text-color-light: White;
+    --text-color-dark: Black;
+    --text-color-alt: DimGray;
+    --text-color-light-link: DimGray;
+    --text-color-dark-link: OrangeRed;
 }
 
 /* Thank you Jason Kottke for free font! */
@@ -19,13 +26,13 @@ body {
     display: flex;
     font-family: 'silkscreen';
     font-size: small;
-    color: white;
+    color: var(--text-color-light);
     text-shadow: 0px 1px 4px rgba(0,0,0,0.2);
-    user-select: none;  /* Selectable text must overwrite this */
+    user-select: none;  /* Any selectable text must overwrite this */
 }
 
 a:link, a:visited {
-    color: DimGray;
+    color: var(--text-color-light-link);
     text-decoration: none;
 }
 
@@ -38,9 +45,18 @@ small {
     vertical-align: middle;
 }
 
+.button {
+    cursor: pointer;
+}
+
+
+
+/* === MAIN === */
+
 #main-container {
     margin: auto;
     display: grid;
+    padding: 10px;
     grid-template-columns: auto 452px auto;
     grid-template-rows: 452px auto;
     grid-template-areas:
@@ -50,21 +66,21 @@ small {
 
 
 
-/******** Game ********/
+/* === GAME === **/
 
 #game-container {
-    position: relative;
     grid-area: game;
+    position: relative;
     height: 450px;
     width: 450px;
     border: 1px solid white;
     background: white;
-    z-index: 1;
-    overflow: hidden; /* To make SSAA'd canvas not cause scroll bars */
+    z-index: 1;  /* Must be on top of sliders */
+    overflow: hidden;  /* To make SSAA'd canvas not cause scroll bars */
     box-shadow: 0 1px 7px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.4);
 }
 
-#canvasnake {
+#game {
     /* So SSAA-ing doesn't move it incorrectly */
     transform-origin: top left;
 }
@@ -74,10 +90,10 @@ small {
     top: 0;
     width: 100%;
     height: 100%;
-    transition: all 0.5s;
+    transition: all 0.6s;
+    z-index: 2;
     cursor: pointer;
     opacity: 1;
-    z-index: 2;
 }
 
 #qr-container-hidden {
@@ -85,6 +101,7 @@ small {
     opacity: 0.08;
 }
 
+/* Center the QR code Canvasnake logo image */
 #qr-container img, #qr-container-hidden img {
     position: absolute;
     top: 50%;
@@ -92,9 +109,27 @@ small {
     transform: translate(-50%, -50%);
 }
 
+#qr-container::after {
+    content: "- click to play -";
+    /* It'd be better if this were positioned in relation to the  */
+    /* qr code… But [img]s can't have pseudo-elements so oh well. */
+    display: inline-block;
+    position: absolute;
+    bottom: 2em;
+    width: 100%;
+    text-align: center;
+    color: var(--red);
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+#qr-container:hover::after {
+    opacity: 1;
+}
 
 
-/******** Generic sliders & contents ********/
+
+/* === GENERIC SLIDER === */
 
 .slider-container {
     display: flex;
@@ -102,14 +137,6 @@ small {
 
 .slider-container img {
     filter: drop-shadow(0px 1px 3px rgba(0,0,0,0.2));
-}
-
-#slider-container-left {
-    grid-area: slider-left;
-}
-
-#slider-container-right {
-    grid-area: slider-right;
 }
 
 .slider {
@@ -121,29 +148,87 @@ small {
     box-shadow: 0 3px 9px rgba(0,0,0,0.2), 0 1px 4px rgba(0,0,0,0.3);
 }
 
+
+
+/* === SIDE SLIDERS === */
+
 .side.slider {
     margin: 30px 0px;
-    transition-duration: 0.1s;
+    transition-duration: 0.1s; /* Hover transition duration */
+}
+
+.side.slider > .button {
+    --button-size: 1.7rem;
+    width: var(--button-size); /* Height of button font size */
+    padding: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.side.slider > .button > span {
+    font-size: var(--button-size);
+    transform:
+        translateX(calc(0px - var(--button-size)))
+        rotate(90deg);
 }
 
 .side.slider > .content {
-    transition-duration: 0.3s;
+    transition-duration: 0.2s; /* Expanding transition duration */
     position: relative;
 }
 
-#slider-menu > .content  {
+.side.slider.collapsed > .content {
+    /* Using !important to override #slider-menu width's specificity */
+    width: 0 !important;
+}
+
+
+
+/* === LEFT SLIDER === */
+
+#slider-container-left {
+    grid-area: slider-left;
+}
+
+
+
+/* === RIGHT SLIDER === */
+
+#slider-container-right {
+    grid-area: slider-right;
+}
+
+.right.side.slider {
+    --background-color: var(--green);
+    background-color: var(--background-color);
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+
+
+/* === MENU SLIDER === */
+
+/* The menu slider is currently on the right, but that could be changed! */
+
+#slider-menu {
+    --menu-width: 250px;
+}
+
+/* To put menu on the other side these need to be left/right flipped. */
+#slider-menu.collapsed {
+    margin-right: 5px;
+}
+#slider-menu.collapsed:hover{
+    padding-left: 5px;
+    margin-right: 0px;
+}
+
+#slider-menu .content  {
     width: var(--menu-width);
 }
 
-#slider-menu-collapsed > .content {
-    width: 0;
-}
-
-#slider-menu-collapsed:hover{
-    padding-left: 5px;
-}
-
-.slider.menu ul {
+.slider.menu .content ul {
     margin: 0;
     list-style-type: none;
     padding: 15px 10px;
@@ -153,22 +238,54 @@ small {
     width: var(--menu-width);
 }
 
-.slider.menu .content > ul li {
+.slider.menu .content ul li {
     font-size: large;
     padding: 10px;
 }
 
-.slider.menu .content ul li:hover {
-    cursor: pointer;
-}
-
-.slider.menu .content ul li:hover > .menu-item > span {
+.slider.menu .content ul li:hover > :first-child > span {
     text-decoration: underline;
 }
 
-.slider.menu .content ul li .description {
-    font-size: x-small;
+/* Add brackets around "default" settings text */
+.slider.menu .content ul li span ~ small::before {
+    content: "(";
+    display: inline-block;
+    margin-left: 0.5em;
+}
+.slider.menu .content ul li span ~ small::after {
+    content: ")";
+    display: inline-block;
+}
+
+.slider.menu .content ul li .option {
+    padding-left: 1px;
+}
+
+/* Bullet points (w/text-shadow) for settings options */
+.slider.menu .content ul li {
+    counter-reset: li;
+}
+.slider.menu .content ul li .option:before {
+    content: counter(li)'.';
+    counter-increment: li;
+    margin-right:0.5em;
+    display: inline-block;  /* Removes underline when selected */
+}
+
+.slider.menu .content ul li .option.selected {
+    background-color: var(--text-color-light);
+    color: var(--background-color);
+    text-shadow: none;
+    box-shadow: 0px 1px 4px rgba(0,0,0,0.1);
+}
+
+.slider.menu .content ul li :nth-child(n+2) {
+    font-size: small;
     margin: 2px;
+}
+
+.slider.menu .content ul li .description {
     padding-left: 1em;
 }
 
@@ -179,44 +296,29 @@ small {
     margin-left: -1em;
 }
 
-.right.side.slider {
-    background-color: var(--green);
-    display: flex;
-    flex-direction: row-reverse;
-}
 
-.side.slider > .button {
-    cursor: pointer;
-    width: 2em; /* Height of button font size */
-    padding: 4px;
-    margin: 0;
-    display: flex;
-    align-items: center;
-}
 
-.side.slider > .button > span {
-    font-size: 2em;
-    transform: translateX(-1em) rotate(90deg);*/
-    transition-duration: 0.3s;
-    padding-top: 1px; /* Adjusting 'cause the font used 1px off... */
-}
-
-.slider.bottom > p {
-    display: block;
-    margin: 0;
-    padding: 16px 10px 1px 10px;
-}
+/* === BOTTOM SLIDERS === */
 
 #slider-container-bottom {
     grid-area: slider-bottom;
     justify-content: center;
 }
 
+.slider.bottom > p {
+    display: block;
+    margin: 0;
+    padding: 16px 8px 1px 8px;
+}
+
 .bottom.slider {
-    margin: 0px 10px;
     align-self: flex-start;
-    transform: translateY(calc(-100% + 70px));
     text-align: center;
+}
+
+.bottom.slider.small {
+    margin: 0px 10px;
+    transform: translateY(calc(-100% + 68px));
 }
 
 .bottom.slider:hover {
@@ -231,11 +333,40 @@ small {
 #slider-twitter {
     background-color: var(--blue);
     width: 95px;
-    cursor: pointer;
 }
 
-#slider-info {
-    background-color: orangered;
+#slider-about {
+    background-color: var(--red);
     width: 64px;
-    cursor: pointer;
+}
+
+.bottom.slider.large {
+    position: absolute;
+    width: 380px;
+    background-color: white;
+    color: black;
+    line-height: 1.1em;
+    padding: 9px 0 0 0;
+}
+
+.bottom.slider.large a {
+    color: var(--red);
+}
+
+.bottom.slider.large p {
+    padding: 4px;
+}
+
+.bottom.slider.large .button {
+    padding-bottom: 9px;
+}
+
+.bottom.slider.large .button:hover {
+    text-decoration: underline;
+}
+
+#about-popout {
+}
+#about-popout.hidden {
+    transform: translateY(-110%);
 }
