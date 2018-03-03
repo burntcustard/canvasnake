@@ -7,19 +7,19 @@ import { check as checkCollision } from './collision.js';
 
 
 export function update(game) {
-    
+
     var snakeI,   // Counter.
         snakeJ,   // Counter.
         snake,    // Current snake being examined.
         nx, ny,   // "Next x & y" variables for storing new location of a snakes head.
         snakeOrder = orderSnakes(game.snakes);
-    
+
     game.debugSquares = [];
 
     // Effectively each snake "taking it's turn".
     // The BIGGER SNAKE will update first and win in a head-on collision.
     for (snakeI = 0 ; snakeI < snakeOrder.length; snakeI++) {
-        
+
         snake = game.snakes[snakeOrder[snakeI]];
 
         // If the snake has a direction (game started?)
@@ -48,7 +48,7 @@ export function update(game) {
                 case 'N': ny--; break;
                 case 'E': nx++; break;
                 case 'S': ny++; break;
-              case 'W': nx--; break;
+                case 'W': nx--; break;
             }
 
             // Increment how many moves since the snake last nommed some food:
@@ -116,6 +116,6 @@ export function update(game) {
             } else if (game.snakes[snakeI].score === game.results.winner.score) {
                 game.results.draw = true;
             }
-        }   
+        }
     }
 }

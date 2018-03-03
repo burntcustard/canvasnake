@@ -106,13 +106,13 @@ function handleInput(input, game) {
     switch (input) {
 
         // Game mode selection
-        case "0" : setGameMode("single Player");       break;
-        case "1" : setGameMode("Single Player vs AI"); break;
-        case "2" : setGameMode("Two Player");          break;
-        case "3" : setGameMode("Three Player");        break;
-        case "4" : setGameMode("AI vs AI");            break;
-        case "5" : setGameMode("Crazy AI");            break;
-        case "6" : setGameMode("Custom");              break;
+        case "1" : setGameMode("single Player");       break;
+        case "2" : setGameMode("Single Player vs AI"); break;
+        case "3" : setGameMode("Two Player");          break;
+        case "4" : setGameMode("Three Player");        break;
+        case "5" : setGameMode("AI vs AI");            break;
+        case "6" : setGameMode("Crazy AI");            break;
+        case "7" : setGameMode("Custom");              break;
 
         // Other
         case "SPACE" : newGame(game); game.state.paused = false; break;

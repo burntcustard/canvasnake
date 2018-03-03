@@ -14,20 +14,23 @@ export function Snake(name, color, speed, ai, controls, direction, coords) {
 
     // Location & movement properties
     this.speed = speed || 200;
-    this.direction = direction;
-    this.newDirection = '';
+    this.direction = direction || 'S';  // Defult direction is South.
+    this.newDirection = '';  // If falsey then the snake is going straight.
     this.coords = coords;
 
     // AI-related properties
     // .ai properties are ones that human players DO NOT have, so
     // AIs cannot use (cannot "see") .ai properties of other snakes.
-    this.ai = ai || {difficulty: "no AI"}; // Contains avoidance.
+    this.ai = ai || {difficulty: "no AI"};  // Contains avoidance.
     this.ai.dizzy = false;
     this.ai.determined = false;
     this.ai.alone = false;
-    this.blocked = {N: false, E: false, S: false, W: false};
+    this.hardblocked = {N: false, E: false, S: false, W: false};
+    this.softBlocked = {N: false, E: false, S: false, W: false};
+    this.blocked = this.hardblocked;  // hardBlocked shorthand.
     // Distance between head & closest food, & it's index:
     this.foodDistance = {x: 0, y: 0, total: 0, closest: 0};
+    this.centerDistance = {x: 0, y: 0, total: 0};
     this.movesSinceNommed = 0;
     this.winning = false;
     this.extraMoves = 0;
@@ -35,23 +38,24 @@ export function Snake(name, color, speed, ai, controls, direction, coords) {
 }
 
 
-
+/**
+ * Updates the snakes direction to match it's new direction.
+ * Disallows the snake from going back on itself.
+ */
 Snake.prototype.updateDirection = function() {
 
-    var d = this.direction,
-        nd = this.newDirection;
+    var d = this.direction;
 
     // If there is a change in direction:
-    if (d !== nd) {
-        //console.log("updating direction of snake, old direction: " +d);
-        switch (nd) {
-            case 'N': if (d !== 'S') { d = 'N'; } break;
-            case 'W': if (d !== 'E') { d = 'W'; } break;
-            case 'S': if (d !== 'N') { d = 'S'; } break;
-            case 'E': if (d !== 'W') { d = 'E'; } break;
+    if (this.newDirection) {
+        //console.log("Updating direction of snake, old direction: " +d);
+        switch (this.newDirection) {
+            case 'N': if (d !== 'S') { this.direction = 'N'; } break;
+            case 'W': if (d !== 'E') { this.direction = 'W'; } break;
+            case 'S': if (d !== 'N') { this.direction = 'S'; } break;
+            case 'E': if (d !== 'W') { this.direction = 'E'; } break;
         }
-        //console.log("snakes new direction: " + d);
-        this.direction = d;  // TODO: See if this is needed
+        //console.log("Snakes new direction: " + d);
     }
 
 };

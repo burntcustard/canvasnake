@@ -66,7 +66,7 @@ export default function newGame(game) {
                     "AI",
                     "purple",
                     200,
-                    {avoidance: {walls: true, snakes: true, tubes: true}, lazy: false, suicideOnWin: true},
+                    {avoidance: {walls: true, snakes: true, tubes: true}, lazy: true, suicideOnWin: true},
                     "Normal AI",
                     'S',
                     [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
@@ -152,19 +152,20 @@ export default function newGame(game) {
             ];
         break;
 
-        case "crazy AI" :
+        case "crazy ai" :
         // Crazy lots of snakes
-            for (s = 1; s <= 50; s++) {
-                name = ("AI " + s);
-                randomStart = {x: Math.floor((Math.random() * 26) + 2), y: Math.floor((Math.random() * 26) + 2)};
+            for (s = 1; s <= 40; s++) {
                 game.snakes.push(new Snake(
-                    name,
+                    "AI " + s,
                     '#'+(Math.random() * 0xFFFFFF << 0).toString(16),
                     20,
-                    {avoidance: {walls: true, snakes: true, tubes: true}, lazy: false, suicideOnWin: true},
+                    {avoidance: {walls: true, snakes: true, tubes: true}, lazy: false, suicideOnWin: false},
                     "Normal AI",
                     'S',
-                    [randomStart]
+                    [{
+                        x: Math.floor((Math.random() * 26) + 2),
+                        y: Math.floor((Math.random() * 26) + 2)
+                    }]
                 ));
             }
         break;

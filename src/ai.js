@@ -4,33 +4,25 @@ import { coinToss } from './lib.js';
 
 
 
-/**
-   * Update AI-related variables. Includes properties that human
-   * players have that the AI needs to look at.
-   */
-export function update(snake, game) {
+function updateFoodDistance(snakeHead, foods) {
 
-    var snakeHead = snake.coords[0],
+    var foodI,
         first = true,
-        foodI,
-        snakeI,
-        enemySnakeI,
-        snakes = game.snakes,
-        tmpFoodDistance = {x: 0, y: 0, total: 0, closest: 0};
+        tmpFoodDistance = {x: 0, y: 0, total: 0, closest: 0},
+        foodDistance = {x: 0, y: 0, total: 0, closest: 0};
 
-    snake.foodDistance = {x: 0, y: 0, total: 0, closest: 0}; // Clear food distance so can be recalculated
+    foods.forEach(function(food) {
 
-    for (foodI = 0; foodI < game.foodArray.length; foodI++) {
       // Distance from food
-      tmpFoodDistance.x = game.foodArray[foodI].x - snakeHead.x;
-      tmpFoodDistance.y = game.foodArray[foodI].y - snakeHead.y;
+      tmpFoodDistance.x = food.x - snakeHead.x;
+      tmpFoodDistance.y = food.y - snakeHead.y;
       tmpFoodDistance.total = Math.abs(tmpFoodDistance.x) + Math.abs(tmpFoodDistance.y);
 
       // If first food being looked at, or food is closer than previously closest food:
-      if ((first) || (tmpFoodDistance.total < snake.foodDistance.total)) {
+      if ((first) || (tmpFoodDistance.total < foodDistance.total)) {
         tmpFoodDistance.closest = foodI;
         // TODO copy the value of tmpFoodDistance all at once to snake.foodDistance?
-        snake.foodDistance = {
+        foodDistance = {
           x: tmpFoodDistance.x,
           y: tmpFoodDistance.y,
           total: tmpFoodDistance.total,
@@ -41,25 +33,71 @@ export function update(snake, game) {
         first = false;
       }
 
-    }
+    });
+
+    return foodDistance;
+
+}
+
+
+
+// Currently probably only works with nicely rounded (even) board size:
+function updateCenterDistance(snakeHead, board) {
+
+    var centerDist = {x: 0, y: 0, total: 0};
+
+    //console.log("Middle cell is X:" + board.w / 2 + ", Y:" + board.h / 2);
+
+    centerDist.x = (board.w / 2) - snakeHead.x;
+    centerDist.y = (board.h / 2) - snakeHead.y;
+    centerDist.total = Math.abs(centerDist.x) + Math.abs(centerDist.y);
+
+    return centerDist;
+
+}
+
+
+
+function updateBlocked(snakeHead, board, snakes) {
 
     // Sets all the blocked values to false so can be recalculated:
-    snake.blocked = {N: false, E: false, S: false, W: false};
+    var blocked = {N: false, E: false, S: false, W: false};
 
     // Check if blocked by walls:
-    if (checkCollision(snakeHead.x, snakeHead.y - 1, 0)) { snake.blocked.N = true; }
-    if (checkCollision(snakeHead.x + 1, snakeHead.y, 0)) { snake.blocked.E = true; }
-    if (checkCollision(snakeHead.x, snakeHead.y + 1, 0)) { snake.blocked.S = true; }
-    if (checkCollision(snakeHead.x - 1, snakeHead.y, 0)) { snake.blocked.W = true; }
+    if (checkCollision(snakeHead.x, snakeHead.y - 1, board)) { blocked.N = true; }
+    if (checkCollision(snakeHead.x + 1, snakeHead.y, board)) { blocked.E = true; }
+    if (checkCollision(snakeHead.x, snakeHead.y + 1, board)) { blocked.S = true; }
+    if (checkCollision(snakeHead.x - 1, snakeHead.y, board)) { blocked.W = true; }
 
-    // Check if blocked by snakes:
-    for (snakeI = 0; snakeI < game.snakes.length; snakeI++) {
-      //console.log("Checking for " + snake.name + "'s potential collision with " + snakes[snakeI].name);
-      if (checkCollision(snakeHead.x, snakeHead.y - 1, snakes[snakeI].coords)) { snake.blocked.N = true; }
-      if (checkCollision(snakeHead.x + 1, snakeHead.y, snakes[snakeI].coords)) { snake.blocked.E = true; }
-      if (checkCollision(snakeHead.x, snakeHead.y + 1, snakes[snakeI].coords)) { snake.blocked.S = true; }
-      if (checkCollision(snakeHead.x - 1, snakeHead.y, snakes[snakeI].coords)) { snake.blocked.W = true; }
-    }
+    // Check if blocked by snakes (including itself):
+    snakes.forEach(function(snake) {
+        //console.log("Checking for " + snake.name + "'s potential collision with " + snakes[snakeI].name);
+        if (checkCollision(snakeHead.x, snakeHead.y - 1, snake.coords)) { blocked.N = true; }
+        if (checkCollision(snakeHead.x + 1, snakeHead.y, snake.coords)) { blocked.E = true; }
+        if (checkCollision(snakeHead.x, snakeHead.y + 1, snake.coords)) { blocked.S = true; }
+        if (checkCollision(snakeHead.x - 1, snakeHead.y, snake.coords)) { blocked.W = true; }
+    });
+
+    return blocked;
+
+}
+
+
+
+/**
+ * Update AI-related variables. Includes properties that human
+ * players have that the AI needs to look at.
+ */
+export function update(snake, game) {
+
+    var enemySnakeI,
+        snakes = game.snakes;
+
+    snake.foodDistance = updateFoodDistance(snake.coords[0], game.foodArray);
+
+    snake.centerDistance = updateCenterDistance(snake.coords[0], game.board);
+
+    snake.blocked = updateBlocked(snake.coords[0], game.board, game.snakes);
 
     // Update properties that only the AI needs:
     if (snake.ai !== "no AI") {
@@ -88,128 +126,90 @@ export function update(snake, game) {
 
     }
 
-  }
+}
 
 
 
-  /**
-   * Sets a snakes new direction to tell it to go towards the food whose coordinates are
-   * held in snake.foodDistance (probably the closest food).
-   * @param {Object} snake - The hungry hungry snake.
-   */
-  function goTowardsFood(snake) {
-    if (snake.direction === 'N') {
-      if (snake.foodDistance.x < 0) { snake.newDirection = "W"; }
-      if (snake.foodDistance.x > 0) { snake.newDirection = "E"; }
-      if (snake.foodDistance.y < 0) { snake.newDirection = "N"; } // Wiggling without this.
-      if (snake.foodDistance.y > 0 && snake.foodDistance.x === 0) {
-        if (coinToss) {
-          snake.newDirection = "E";
-        } else {
-          snake.newDirection = "W";
-        }
-      }
+function getDirectionTo(currentDirection, targetDistX, targetDistY) {
+
+    var newDirection;
+
+    switch (currentDirection) {
+
+        case 'N': {
+            if (targetDistX < 0) { newDirection = 'W'; }
+            if (targetDistX > 0) { newDirection = 'E'; }
+            if (targetDistY < 0) { newDirection = 'N'; }  // Wiggling without this.
+            if (targetDistY > 0 && targetDistX === 0) {
+                newDirection = coinToss() ? 'W' : 'E';  // Order doesn't matter.
+            }
+        } break;
+
+        case 'E': {
+            if (targetDistY > 0) { newDirection = 'S'; }
+            if (targetDistY < 0) { newDirection = 'N'; }
+            if (targetDistX > 0) { newDirection = 'E'; }
+            if (targetDistX < 0 && targetDistX === 0) {
+                newDirection = coinToss() ? 'S' : 'N';
+            }
+        } break;
+
+        case 'S': {
+            if (targetDistX > 0) { newDirection = 'E'; }
+            if (targetDistX < 0) { newDirection = 'W'; }
+            if (targetDistY > 0) { newDirection = 'S'; }
+            if (targetDistY < 0 && targetDistX === 0) {
+                newDirection = coinToss() ? 'E' : 'W';
+            }
+        } break;
+
+        case 'W': {
+            if (targetDistY < 0) { newDirection = 'N'; }
+            if (targetDistY > 0) { newDirection = 'S'; }
+            if (targetDistX < 0) { newDirection = 'W'; }
+            if (targetDistX > 0 && targetDistX === 0) {
+                newDirection = coinToss() ? 'N' : 'S';
+            }
+        } break;
+
     }
-    if (snake.direction === 'W') {
-      if (snake.foodDistance.y < 0) { snake.newDirection = "N"; }
-      if (snake.foodDistance.y > 0) { snake.newDirection = "S"; }
-      if (snake.foodDistance.x < 0) { snake.newDirection = "W"; }
-      if (snake.foodDistance.x > 0 && snake.foodDistance.y === 0) {
-        if (coinToss) {
-          snake.newDirection = "N";
-        } else {
-          snake.newDirection = "S";
-        }
-      }
-    }
-    if (snake.direction === 'S') {
-      if (snake.foodDistance.x < 0) { snake.newDirection = "W"; }
-      if (snake.foodDistance.x > 0) { snake.newDirection = "E"; }
-      if (snake.foodDistance.y > 0) { snake.newDirection = "S"; }
-      if (snake.foodDistance.y < 0 && snake.foodDistance.x === 0) {
-        if (coinToss) {
-          snake.newDirection = "E";
-        } else {
-          snake.newDirection = "W";
-        }
-      }
-    }
-    if (snake.direction === 'E') {
-      if (snake.foodDistance.y < 0) { snake.newDirection = "N"; }
-      if (snake.foodDistance.y > 0) { snake.newDirection = "S"; }
-      if (snake.foodDistance.x > 0) { snake.newDirection = "E"; }
-      if (snake.foodDistance.x < 0 && snake.foodDistance.y === 0) {
-        if (coinToss) {
-          snake.newDirection = "N";
-        } else {
-          snake.newDirection = "S";
-        }
-      }
-    }
-  }
+
+    return newDirection;
+
+}
 
 
 
-  /**
-   * Sets a snakes new direction to tell it to go towards the center of the game board.
-   * @param {Object} snake - The lazy snake.
-   */
-  function goTowardsCenter(snake, board) {
+/**
+* Sets a snakes new direction to tell it to go towards the food whose coordinates are
+* held in snake.foodDistance (probably the closest food).
+* @param {Object} snake - The hungry hungry snake.
+*/
+function goTowardsFood(snake) {
 
-    // Currently probably only works with nicely rounded (even) board size:
-    var wMid = (board.w / 2),
-        hMid = (board.h / 2);
-    //console.log("Middle cell is X:" + wMid + ", Y:" + hMid);
+    snake.newDirection = getDirectionTo(
+        snake.direction,
+        snake.foodDistance.x,
+        snake.foodDistance.y
+    );
 
-    if (snake.direction === 'N') {
-      if (snake.coords[0].x < wMid) { snake.newDirection = "E"; }
-      if (snake.coords[0].x > wMid) { snake.newDirection = "W"; }
-      if (snake.coords[0].y > hMid) { snake.newDirection = "N"; }
-      if (snake.coords[0].y < hMid && snake.coords.x === wMid) {
-        if (coinToss) {
-          snake.newDirection = "E";
-        } else {
-          snake.newDirection = "W";
-        }
-      }
-    }
-    if (snake.direction === 'E') {
-      if (snake.coords[0].y > hMid) { snake.newDirection = "N"; }
-      if (snake.coords[0].y < hMid) { snake.newDirection = "S"; }
-      if (snake.coords[0].x < wMid) { snake.newDirection = "E"; }
-      if (snake.coords[0].x > wMid && snake.coords.y === hMid) {
-        if (coinToss) {
-          snake.newDirection = "N";
-        } else {
-          snake.newDirection = "S";
-        }
-      }
-    }
-    if (snake.direction === 'S') {
-      if (snake.coords[0].x > wMid) { snake.newDirection = "W"; }
-      if (snake.coords[0].x < wMid) { snake.newDirection = "E"; }
-      if (snake.coords[0].y < hMid) { snake.newDirection = "S"; }
-      if (snake.coords[0].y > hMid && snake.coords.x === wMid) {
-        if (coinToss) {
-          snake.newDirection = "W";
-        } else {
-          snake.newDirection = "E";
-        }
-      }
-    }
-    if (snake.direction === 'W') {
-      if (snake.coords[0].y > hMid) { snake.newDirection = "N"; }
-      if (snake.coords[0].y < hMid) { snake.newDirection = "S"; }
-      if (snake.coords[0].x > wMid) { snake.newDirection = "W"; }
-      if (snake.coords[0].x < wMid && snake.coords.y === wMid) {
-        if (coinToss) {
-          snake.newDirection = "S";
-        } else {
-          snake.newDirection = "N";
-        }
-      }
-    }
-  }
+}
+
+
+
+/**
+ * Sets a snakes new direction to tell it to go towards the center of the game board.
+ * @param {Object} snake - The lazy snake.
+ */
+function goTowardsCenter(snake, board) {
+
+    snake.newDirection = getDirectionTo(
+        snake.direction,
+        snake.centerDistance.x,
+        snake.centerDistance.y
+    );
+
+}
 
 
 
@@ -328,7 +328,7 @@ export function update(snake, game) {
         iSS, iSW, // Used to loop through the a snakes view distance block by block,
         iWS, iWW; // looking for either a Snake or Wall to avoid.
 
-    switch (snake.newDirection) {
+    switch (snake.newDirection || snake.direction) {
       case 'N': {
         if (snake.ai.avoidance.snakes) {
           for (iNS = 1; iNS < viewDistance.x; iNS++) { // "iNS" is index North Snake
@@ -483,52 +483,77 @@ export function update(snake, game) {
 
 
 
-  /*
-   * Determines a new direction for the AI to turn
-   */
+/**
+ * Returns true if snakeA's head is closer to snakeA's closest food, than
+ * snakeB's head to snakeB's closest food, otherwise returns false.
+ * @param   {object}   snakeA Snake
+ * @param   {object}   snakeB Snake
+ * @returns {boolean}
+ */
+function closerToFood(snakeA, snakeB) {
+    return snakeA.foodDistance.total < snakeB.foodDistance.total;
+}
+
+
+
+/**
+  * Determines a new direction for the AI to turn.
+  */
 export function chooseDirection(snake, game) {
 
-    var snakeI,
-        cba; // A lazy snake Can't Be Arsed (=true) to go to food if other snake/s are closer.
-
     if (!snake.ai.lazy) {
-      goTowardsFood(snake);
-    } else {
-      // Lazy ai goes towards the center (+ shape) of the map if other snakes are closer to food
-      cba = false;
-      // Check if other snakes head is closer to food
-      for (snakeI = 0; snakeI < game.snakes.length; snakeI++) {
-        if (game.snakes[snakeI].foodDistance.total < snake.foodDistance.total) { cba = true; }
-      }
-      if (!cba || snake.ai.alone || game.foodArray.length > 1) {
-        // This snake is closer than all other alive snakes to single food, or there's more than 1 food, go get!
-        if (game.settings.debug) { console.log(snake.name + " is NOT being lazy, going for food"); }
+
         goTowardsFood(snake);
-      } else {
-        // This snake is further away from food, just go towards middle of map.
-        if (game.settings.debug) { console.log(snake.name + " cba, just going to center"); }
-        goTowardsCenter(snake, game.board);
-      }
+
+    } else {
+
+        let cba = false;
+
+        // A lazy snake Can't Be Arsed (cba=true) to go to food if other snake/s are closer.
+        // Lazy ai goes towards the center (+ shape) of the map if other snakes are closer to food.
+
+        // Check if other snakes heads are closer to food
+        game.snakes.forEach(function(otherSnake) {
+            if (otherSnake !== snake && closerToFood(otherSnake, snake)) {
+                cba = true;
+            }
+        });
+
+        if (!cba || snake.ai.alone || game.foodArray.length > 1) {
+            // This snake is closer than all other alive snakes to
+            // single food, or there's more than 1 food, go get!
+            if (game.settings.debug) {
+                console.log(snake.name + " is NOT being lazy, and is going for food");
+            }
+            goTowardsFood(snake);
+        } else {
+            // This snake is further away from food, just go towards middle of board.
+            if (game.settings.debug) {
+                console.log(snake.name + " cba, and is just going to center");
+            }
+            goTowardsCenter(snake, game.board);
+        }
+
     }
 
     if (snake.ai.avoidance !== "none") {
 
-      // Check if you gonna crash and avoid it:
-      switch (snake.newDirection) {
-        case 'N': if (snake.blocked.N) { avoidDirection(snake, 'N', game); } break;
-        case 'E': if (snake.blocked.E) { avoidDirection(snake, 'E', game); } break;
-        case 'S': if (snake.blocked.S) { avoidDirection(snake, 'S', game); } break;
-        case 'W': if (snake.blocked.W) { avoidDirection(snake, 'W', game); } break;
-      }
-
-      // Check if you gonna go into a tube
-      if (snake.ai.avoidance.tubes && !snake.ai.determined) {
-        if (detectTube(snake, game)) {
-          avoidDirection(snake, snake.newDirection, game);
+        // Check if you gonna crash and avoid it. Uses the snakes current direction
+        // if there is no new direction (i.e. if newDirection is falsey).
+        switch (snake.newDirection || snake.direction) {
+            case 'N': if (snake.blocked.N) { avoidDirection(snake, 'N', game); } break;
+            case 'E': if (snake.blocked.E) { avoidDirection(snake, 'E', game); } break;
+            case 'S': if (snake.blocked.S) { avoidDirection(snake, 'S', game); } break;
+            case 'W': if (snake.blocked.W) { avoidDirection(snake, 'W', game); } break;
         }
-      }
 
-    } else {
-      if (game.settings.debug) { console.log(snake.name + " isn't using ai avoidance when it probably should!"); }
+        // Check if you gonna go into a tube
+        if (snake.ai.avoidance.tubes && !snake.ai.determined) {
+            if (detectTube(snake, game)) {
+                avoidDirection(snake, snake.newDirection, game);
+            }
+        }
+
     }
-  }
+
+}
