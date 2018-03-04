@@ -18,7 +18,7 @@ window.game = {
     settings: {
         debug: false,        // Enable/disables console log messages.
         autoRepeat:  false,  // Restarts the game automatically when gameover occurs.
-        ssaa: SSAA,            // Supersampling anti-aliasing.
+        ssaa: SSAA,          // Supersampling anti-aliasing.
         gameMode: "Single player vs AI" // Initial gamemode is 1 human player against 1 AI.
     },
 
@@ -48,9 +48,11 @@ window.game = {
     updateInterval: 0, // How frequently the turns occur in ms (lower number = faster).
     board: {w: 0, h: 0}, // Current grid/board setup is 0 to 29 (inclusive), so 30x30
 
-    highScore: 0,   // Holds the highest score accomplished on that PC/web browers.
-    snakes: [],     // Array of snake objects that are on the board (human player snakes and/or AI snakes).
-    foodArray: [],  // Array of foods that are on the board
+    // Holds the highest score accomplished on that PC/web browers.
+    highScores: {},
+
+    snakes: [],  // Array of snake objects that are on the board (human player snakes and/or AI snakes).
+    foodArray: [],   // Array of foods that are on the board
     debugSquares: [],
 
     gameLoop: null,
@@ -68,11 +70,17 @@ window.canvasnake = function() {
     // Global-ish variables (too many?):
     var game = window.game;
 
-    var canvas = document.getElementById("game"),
-        ctx = canvas.getContext("2d");
+    // Set references to canvases and canvases contexts:
+    // (Plain canvas and ctx are references to gameCanvas and gameCtx)
+    game.ui.gameCanvas = game.ui.canvas = document.getElementById("gameCanvas");
+    game.ui.gameCtx = game.ui.ctx = game.ui.gameCanvas.getContext("2d");
+    game.ui.textCanvas = document.getElementById("textCanvas");
+    game.ui.textCtx = game.ui.textCanvas.getContext("2d");
 
-    game.ui.canvas = canvas;
-    game.ui.ctx = ctx;
+    // "Shortcuts" for clearing the canvases (currently assumes any canvases are the same size)
+    game.ui.clear = function(ctx) {
+        ctx.clearRect(0, 0, game.ui.canvas.width, game.ui.canvas.height);
+    };
 
     game.getCombinedScore = function() {
 
@@ -87,6 +95,8 @@ window.canvasnake = function() {
 
     };
 
+    // This actually creates a listener function which then does something with any inputs that are detected:
+    input.get(game, document, game.ui.canvas);  // TODO: Figure out if whole document has to be used?)
 
     game.mainLoopFunc = function mainLoop() {
 
@@ -95,16 +105,14 @@ window.canvasnake = function() {
         // Clear debug squares array so they can be repopulated this turn:
         if (!game.step) { game.debugSquares = []; }
 
-        // This actually creates a listener function which then does something with any inputs that are detected:
-        input.get(game, document, canvas);  // TODO: Figure out if whole document has to be used?)
-
         if (!game.state.gameOver || game.ui.redrawEnd) {
 
             if (!game.state.paused) {
                 update(game);
+                render(game);
             }
 
-            render(game);
+            if (game.state.firstTurn) game.state.firstTurn = false;
 
             if (game.state.gameOver && game.settings.autoRepeat === true) {
                 newGame(game);
@@ -126,28 +134,25 @@ window.canvasnake = function() {
     game.state.running = true;
 
   // Check if the canvas' size is set correctly:
-  if (canvas.width % game.ui.cellSize === 0 || canvas.height % game.ui.cellSize === 0) {
-    game.board.w = canvas.width / game.ui.cellSize;
-    game.board.h = canvas.height / game.ui.cellSize;
-  } else {
-    throw new Error("Canvas width and height must be divisible by " + game.ui.cellSize + " without remainder.");
-  }
+    if (game.ui.canvas.width % game.ui.cellSize === 0 || game.ui.canvas.height % game.ui.cellSize === 0) {
+        game.board.w = game.ui.canvas.width / game.ui.cellSize;
+        game.board.h = game.ui.canvas.height / game.ui.cellSize;
+    } else {
+        throw new Error("Canvas width and height must be divisible by " + game.ui.cellSize + " without remainder.");
+    }
 
-    // Set the scale, shadow size, etc.:
-    //console.log(game.settings.ssaa);
     game.settings.ssaa.set();
 
-  // Assign touch event (for touch controls) to faded QR code logo if it exists... soon.
-  var qrContainer = document.getElementById("qrCode");
-  setTimeout(function() {
-    qrContainer.addEventListener ("touchstart", input.touched);
-  }, 2500); // The delay is so that.. I have no fucking idea. Plz send help.
+    // Assign touch event (for touch controls) to faded QR code logo if it exists... soon.
+    var qrContainer = document.getElementById("qrCode");
+    setTimeout(function() {
+        qrContainer.addEventListener ("touchstart", input.touched);
+    }, 2500); // The delay is so that.. I have no fucking idea. Plz send help.
 
+    // Assign the highscore as whatever is set in the browsers local storage:
+    if (!localStorage.highScore) { game.highScore = 0; } else { game.highScore = localStorage.highScore; }
 
-  // Assign the highscore as whatever is set in the browsers local storage:
-  if (!localStorage.highScore) { game.highScore = 0; } else { game.highScore = localStorage.highScore; }
-
-  // Start a new game!
-  newGame(game);
+    // Start a new game!
+    newGame(game);
 
 };

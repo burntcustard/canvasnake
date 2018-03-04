@@ -1,4 +1,14 @@
 
+
+
+export const Obstacle = Object.freeze({
+    WALL: "a wall",
+    SELF: "itself",
+    ENEMY: "another snake"
+});
+
+
+
 /**
    * Collisions detection algorithm.
    * @param   {int}   x      - X coordinate
@@ -12,7 +22,7 @@ export function check(x, y, target) {
 
     // The target has a width and height? We're checking if you've smacked a wall!
     if (target.w && target.h) {
-      if (x === -1 || x === target.w || y === -1 || y === target.h) { return true; }
+        if (x === -1 || x === target.w || y === -1 || y === target.h) { return true; }
     }
     else
     {

@@ -18,7 +18,8 @@
         <div id="main-container">
 
             <div id="game-container">
-                <canvas id="game" width="450" height="450">Error loading canvasnake :(</canvas>
+                <canvas id="gameCanvas" width="450" height="450">Error loading canvasnake :(</canvas>
+                <canvas id="textCanvas" width="450" height="450"></canvas>
                 <div id="qr-container">
                     <img src="https://i.imgur.com/WereCeb.png" id="qrCode" alt="QR code">
                 </div>
@@ -33,7 +34,7 @@
                     </div>
                     <div id="menu-content" class="content">
                         <ul>
-                            <li class="button" onclick="incrementGameMode();">
+                            <li class="button" onclick="selectGameMode(+1);">
                                 <div id="gamemode"><span>Gamemode</span></div>
                                 <div class="option">Single player</div>
                                 <div class="option selected">Single player vs AI</div>
@@ -59,10 +60,17 @@
                                 </div>
                                 <div class="description">Shortcut: R</div>
                             </li>
+                            <li>
+                                <div>
+                                    <span>Keys</span>
+                                </div>
+                                <div class="description shortcut">Pause: P</div>
+                            </li>
                         </ul>
                     </div>
                 </div>
             </div>
+
 
             <div id="slider-container-bottom" class="slider-container">
                 <div id="slider-mobile" class="slider bottom small">

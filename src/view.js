@@ -7,10 +7,24 @@ import { touched, noTouch } from './input.js';
 import { snakeInfo } from './infoString.js';
 
 
+
 /**
-   * Resizes the canvasnake game.
-   * TODO: Resize the rest of the page.
-   */
+ * Rescale a specific canvas and it's CanvasRenderingContext2D.
+ */
+function reScaleCanvasAndCtx(canvas, ctx, multiplier, scale) {
+    canvas.width *= multiplier;
+    canvas.height *= multiplier;
+    canvas.style.transform = "scale(" + 1 / scale + ")";
+    ctx.shadowColor = "rgba(0,0,0,0.2)";
+    ctx.shadowBlur = 6 * scale;
+    ctx.shadowOffsetY = 2 * scale;
+}
+
+
+
+/**
+ * Rescales the canvasnake game and text canvases.
+ */
 export function reScale(ui, value) {
 
     var multiplier = value / ui.scale;
@@ -19,15 +33,8 @@ export function reScale(ui, value) {
     ui.textSize *= multiplier;
     ui.cellSize *= multiplier;
 
-    if (ui.canvas) {
-        ui.canvas.width *= multiplier;
-        ui.canvas.height *= multiplier;
-        ui.canvas.style.transform = "scale(" + 1 / ui.scale + ")";
-    }
-
-    ui.ctx.shadowColor = "rgba(0,0,0,0.2)";
-    ui.ctx.shadowBlur = 6 * ui.scale;
-    ui.ctx.shadowOffsetY = 2 * ui.scale;
+    if (ui.gameCanvas) reScaleCanvasAndCtx(ui.gameCanvas, ui.gameCtx, multiplier, ui.scale);
+    if (ui.textCanvas) reScaleCanvasAndCtx(ui.textCanvas, ui.textCtx, multiplier, ui.scale);
 
     ui.redrawEnd = true;
 
@@ -38,9 +45,16 @@ export function reScale(ui, value) {
 
 
 
-// Paint a square slightly smaller than cSize to make a 1px border around the edge
+/**
+ * Paint a square slightly smaller than cell size (resulting
+ * in a 1px transparent border around the edge of the cell).
+ * @param {object}    ui    Reference to the game's ui property.
+ * @param {CSS color} color (Optional) color to paint. If falsey the previously set fillStyle is used.
+ * @param {number}    x     X coordinate of the top left of the square.
+ * @param {number}    y     Y coordinate of the top left of the square.
+ */
 function paintCell(ui, color, x, y) {
-    ui.ctx.fillStyle = color;
+    if (color) ui.ctx.fillStyle = color;
     ui.ctx.fillRect(
         x * ui.cellSize + 1 * ui.scale,
         y * ui.cellSize + 1 * ui.scale,
@@ -53,7 +67,7 @@ function paintCell(ui, color, x, y) {
 
 // Paint a square slightly smaller than paintCell
 function paintSmallCell(ui, color, x, y) {
-    ui.ctx.fillStyle = color;
+    if (color) ui.ctx.fillStyle = color;
     ui.ctx.fillRect(
         x * ui.cellSize + 3 * ui.scale,
         y * ui.cellSize + 3 * ui.scale,
@@ -64,87 +78,86 @@ function paintSmallCell(ui, color, x, y) {
 
 
 
-function drawTongueSection(ui, head, offsetX, offsetY, x, y, w, h) {
-    ui.ctx.fillRect(
-        ((head.x + offsetX) * ui.cellSize + x * ui.scale),
-        ((head.y + offsetY) * ui.cellSize + y * ui.scale),
-        w * ui.scale,
-        h * ui.scale
-    );
-}
-
-
-
 function drawSnake(ui, snake) {
 
     var cSize = ui.cellSize,
-        sf = ui.scale;
+        sf = ui.scale,
+        head = snake.coords[0];
 
-    // Render tongue
-    if (!snake.dead) { // Only show tongue if not dead
-      var head = snake.coords[0];
-      ui.ctx.fillStyle = ui.textColor; // orangeRed
-      if (snake.direction === 'N') {
-        drawTongueSection( ui, head, 0, 0,  6, -7, 3, 6);
-        drawTongueSection( ui, head, 0, 0,  4,-10, 3, 6);
-        drawTongueSection( ui, head, 0, 0,  8,-10, 3, 6);
-      }
-      if (snake.direction === 'E') {
-        drawTongueSection( ui, head, 1, 0,  1,  6, 6, 3);
-        drawTongueSection( ui, head, 1, 0,  4,  4, 6, 3);
-        drawTongueSection( ui, head, 1, 0,  4,  8, 6, 3);
-      }
-      if (snake.direction === 'S') {
-        drawTongueSection( ui, head, 0, 1,  6,  1, 3, 6);
-        drawTongueSection( ui, head, 0, 1,  4,  4, 3, 6);
-        drawTongueSection( ui, head, 0, 1,  8,  4, 3, 6);
-      }
-      if (snake.direction === 'W') {
-        drawTongueSection( ui, head, 0, 0, -7,  6, 6, 3);
-        drawTongueSection( ui, head, 0, 0,-10,  4, 6, 3);
-        drawTongueSection( ui, head, 0, 0,-10,  8, 6, 3);
-      }
-    }
+    // Render tongue if the snake is not dead:
+    if (!snake.dead) {
 
-    // Render snake bodies
-    for (var coordsI = 0; coordsI < snake.coords.length; coordsI++) {
-    //for(var i = 0; i<snakeArray.length; i++) {
-      var segment = snake.coords[coordsI];
-      //console.log(segment);
-      //console.log("Rendering snake " + snakeI + ", segment: " + coordsI + ", at coords: " + segment.x + segment.y);
-      paintCell(ui, (snake.color), segment.x, segment.y);
-    }
+        ui.ctx.fillStyle = ui.textColor;  // Probably orangeRed
 
-    // Render AI heads
-    if (snake.ai.difficulty !== "no AI") { // Only show fancy head if not dead and is an AI
+        let drawTongueSection = function(ui, head, offsetX, offsetY, x, y, w, h) {
+            ui.ctx.fillRect(
+                ((head.x + offsetX) * ui.cellSize + x * ui.scale),
+                ((head.y + offsetY) * ui.cellSize + y * ui.scale),
+                w * ui.scale,
+                h * ui.scale
+            );
+        };
 
-      // White hole (would need to fill color if background not white)
-      ui.ctx.clearRect(snake.coords[0].x * cSize + 5*sf, snake.coords[0].y * cSize + 5*sf, 5*sf, 5*sf);
-
-      // Black antenna
-      ui.ctx.fillStyle = "black";
-      if (snake.direction === 'N' || snake.direction === 'S') {
-        ui.ctx.fillRect(snake.coords[0].x * cSize - 2*sf, snake.coords[0].y * cSize + 4*sf, 3*sf, 2*sf); // Up Dot
-        ui.ctx.fillRect(snake.coords[0].x * cSize - 4*sf, snake.coords[0].y * cSize + 8*sf, 5*sf, 2*sf); // Down Dot
-      } else {
-        ui.ctx.fillRect(snake.coords[0].x * cSize + 4*sf, snake.coords[0].y * cSize - 2*sf, 2*sf, 3*sf); // L Dot
-        ui.ctx.fillRect(snake.coords[0].x * cSize + 8*sf, snake.coords[0].y * cSize - 4*sf, 2*sf, 5*sf); // R Dot
-      }
-
-      if (!snake.dead) {
-        // Red bits: end of antenna, eye.
-        ui.ctx.fillStyle = ui.textColor; // (orangered)
-        if (snake.direction === 'N' || snake.direction === 'S') {
-          ui.ctx.fillRect(snake.coords[0].x * cSize + 6*sf, snake.coords[0].y * cSize + 4*sf, 3*sf, 7*sf); // Eye
-          ui.ctx.fillRect(snake.coords[0].x * cSize - 4*sf, snake.coords[0].y * cSize + 4*sf, 2*sf, 2*sf); // L Dot
-          ui.ctx.fillRect(snake.coords[0].x * cSize - 6*sf, snake.coords[0].y * cSize + 8*sf, 2*sf, 2*sf); // R Dot
-        } else {
-          ui.ctx.fillRect(snake.coords[0].x * cSize + 4*sf, snake.coords[0].y * cSize + 6*sf, 7*sf, 3*sf); // Eye
-          ui.ctx.fillRect(snake.coords[0].x * cSize + 4*sf, snake.coords[0].y * cSize - 4*sf, 2*sf, 2*sf); // L Dot
-          ui.ctx.fillRect(snake.coords[0].x * cSize + 8*sf, snake.coords[0].y * cSize - 6*sf, 2*sf, 2*sf); // R Dot
+        switch (snake.direction) {
+            case 'N':
+            drawTongueSection(ui, head, 0, 0,  6, -7, 3, 6);
+            drawTongueSection(ui, head, 0, 0,  4,-10, 3, 6);
+            drawTongueSection(ui, head, 0, 0,  8,-10, 3, 6);
+            break;
+            case 'E':
+            drawTongueSection(ui, head, 1, 0,  1,  6, 6, 3);
+            drawTongueSection(ui, head, 1, 0,  4,  4, 6, 3);
+            drawTongueSection(ui, head, 1, 0,  4,  8, 6, 3);
+            break;
+            case 'S':
+            drawTongueSection(ui, head, 0, 1,  6,  1, 3, 6);
+            drawTongueSection(ui, head, 0, 1,  4,  4, 3, 6);
+            drawTongueSection(ui, head, 0, 1,  8,  4, 3, 6);
+            break;
+            case 'W':
+            drawTongueSection(ui, head, 0, 0, -7,  6, 6, 3);
+            drawTongueSection(ui, head, 0, 0,-10,  4, 6, 3);
+            drawTongueSection(ui, head, 0, 0,-10,  8, 6, 3);
+            break;
         }
-      }
 
+    }
+
+    // Render snake bodies:
+    ui.ctx.fillStyle = snake.color;
+    snake.coords.forEach(function(segment){
+        paintCell(ui, null, segment.x, segment.y);
+    });
+
+    // Render AI snake extra head bits that show while the AI is alive or dead:
+    if (snake.ai) {
+
+        // White hole (would need to fill color if the background was not white)
+        ui.ctx.clearRect(head.x * cSize + 5*sf, head.y * cSize + 5*sf, 5*sf, 5*sf);
+
+        // Black antenna
+        ui.ctx.fillStyle = "black";
+        if (snake.direction === 'N' || snake.direction === 'S') {
+            ui.ctx.fillRect(head.x * cSize - 2*sf, head.y * cSize + 4*sf, 3*sf, 2*sf); // Up Dot
+            ui.ctx.fillRect(head.x * cSize - 4*sf, head.y * cSize + 8*sf, 5*sf, 2*sf); // Down Dot
+        } else {
+            ui.ctx.fillRect(head.x * cSize + 4*sf, head.y * cSize - 2*sf, 2*sf, 3*sf); // L Dot
+            ui.ctx.fillRect(head.x * cSize + 8*sf, head.y * cSize - 4*sf, 2*sf, 5*sf); // R Dot
+        }
+    }
+
+    // Render AI snake extra head bits that are red and only show while the AI is alive:
+    if (snake.ai && !snake.dead) {
+        ui.ctx.fillStyle = ui.textColor;
+        if (snake.direction === 'N' || snake.direction === 'S') {
+            ui.ctx.fillRect(head.x * cSize + 6*sf, head.y * cSize + 4*sf, 3*sf, 7*sf); // Eye
+            ui.ctx.fillRect(head.x * cSize - 4*sf, head.y * cSize + 4*sf, 2*sf, 2*sf); // L Dot
+            ui.ctx.fillRect(head.x * cSize - 6*sf, head.y * cSize + 8*sf, 2*sf, 2*sf); // R Dot
+        } else {
+            ui.ctx.fillRect(head.x * cSize + 4*sf, head.y * cSize + 6*sf, 7*sf, 3*sf); // Eye
+            ui.ctx.fillRect(head.x * cSize + 4*sf, head.y * cSize - 4*sf, 2*sf, 2*sf); // L Dot
+            ui.ctx.fillRect(head.x * cSize + 8*sf, head.y * cSize - 6*sf, 2*sf, 2*sf); // R Dot
+        }
     }
 
 }
@@ -153,27 +166,66 @@ function drawSnake(ui, snake) {
 
 /**
  * Write line(s) of text to canvas.
- * @param {int}    size   - Font size. E.g. "textSize * 2" or "16".
- * @param {String} xAlign - Horizontal positioning of the text. Possible values: |left   cen|ter    right|
- * @param {String} yAlign - Vertical positioning of the text. Possible values: "top"   -middle-   _bottom_
- * @param {String} output - The text to display. Use "<br>"s to create newlines.
- * @param {int}    x      - Horizontal location of text.
- * @param {int}    y      - Vertical location of text.
+ * @param {Reference} ctx    - A reference to a CanvasRenderingContext2D to write text to.
+ * @param {int}       size   - Font size. E.g. "textSize * 2" or "16".
+ * @param {CSS color} color  - The color for the text.
+ * @param {String}    xAlign - Horizontal positioning of the text. Possible values: |left   cen|ter    right|
+ * @param {String}    yAlign - Vertical positioning of the text. Possible values: "top"   -middle-   _bottom_
+ * @param {String}    text   - The text to display. Use "<br>"s to create newlines.
+ * @param {int}       x      - Horizontal location of text.
+ * @param {int}       y      - Vertical location of text.
  */
-function write(ui, size, xAlign, yAlign, output, x, y) {
+function write(ctx, size, color, xAlign, yAlign, text, x, y) {
 
-    ui.ctx.fillStyle = (ui.textColor);
-    ui.ctx.font = (size + "px silkscreen");
-    ui.ctx.textAlign = (xAlign);
-    ui.ctx.textBaseline = (yAlign);
+    ctx.fillStyle = (color || "black");
+    ctx.font = (size + "px silkscreen");
+    ctx.textAlign = (xAlign);
+    ctx.textBaseline = (yAlign);
 
-    var lineHeight = ui.ctx.measureText("M").width * 1.2,
-        lines = output.split("<br>"),
-        l;
+    var lineHeight = ctx.measureText("M").width * 1.3,
+        lines = text.split("<br>");
 
-    for (l = 0; l < lines.length; l++) {
-        ui.ctx.fillText(lines[l], x, y);
-        y += lineHeight;
+    lines.forEach(function(line) {
+        ctx.fillText(line, x, y);
+        y+= lineHeight;
+    });
+
+}
+
+
+
+function drawScores(ui, snakes, highScore, onlyAI) {
+
+    ui.clear(ui.textCtx);
+
+    // Draw scores:
+    for (var snakeI = 0; snakeI < snakes.length; snakeI++) {
+        write(
+            ui.textCtx,
+            ui.textSize,
+            ui.textColor,
+            "left",
+            "bottom",
+            ("Score: " + snakes[snakeI].score),
+            (snakeI * 100 * ui.scale + 4 * ui.scale),
+            ui.textCanvas.height - 2 * ui.scale
+        );
+    }
+
+    // Draw highscore:
+    if (highScore !== undefined) {
+        let highScoreText = "HighScore: " + highScore;
+        if (onlyAI) highScoreText = "AI " + highScoreText;
+        write(
+            ui.textCtx,
+            ui.textSize,
+            ui.textColor,
+            "right",
+            "bottom",
+            highScoreText,
+            ui.canvas.width - 5 * ui.scale,
+            ui.canvas.height - 2 * ui.scale
+        );
     }
 
 }
@@ -182,17 +234,21 @@ function write(ui, size, xAlign, yAlign, output, x, y) {
 
 export function render(game) {
 
-    var snakeI,
-        snakes = game.snakes,
-        ui = game.ui,
+    var ui = game.ui,
         textSizeM = ui.textSize,
         textSizeL = ui.textSize * 2,
         sf = ui.scale,
         w = ui.canvas.width,
         h = ui.canvas.height;
 
-    // Clear entire canvas:
-    ui.ctx.clearRect(0, 0, ui.canvas.width, ui.canvas.height);
+    // Clear entire game canvas:
+    ui.clear(ui.gameCtx);
+
+    // If it's the first turn of the game (and therefore the first render pass):
+    if (game.state.firstTurn) {
+        ui.clear(ui.textCtx);  // Clear the old scores and/or end screen.
+        if (!game.scoresNeverNeedDrawing) game.scoresNeedDrawing = true;
+    }
 
     // Draw food:
     for(var j = 0; j < game.foodArray.length; j++) {
@@ -200,41 +256,20 @@ export function render(game) {
         paintCell(ui, f.color, f.x, f.y);
     }
 
-    // Draw snakes:
-    // Could use some sort of forEach
-    for (snakeI = 0; snakeI < snakes.length; snakeI++) {
-        drawSnake(game.ui, snakes[snakeI]);
+    game.snakes.forEach(function(snake) {
+        drawSnake(game.ui, snake);
+    });
+
+    // Draw debug squares:
+    for (var iDebug = 0; iDebug < game.debugSquares.length; iDebug++) {
+        paintSmallCell(game.ui, "pink", game.debugSquares[iDebug].x, game.debugSquares[iDebug].y);
     }
 
     // Draw scores:
-    for (snakeI = 0; snakeI < snakes.length; snakeI++) {
-        write(
-            ui,
-            textSizeM,
-            "left",
-            "bottom",
-            ("Score: " +snakes[snakeI].score),
-            (snakeI * 100 * sf + 4 * sf),
-            ui.canvas.height - 2 * sf
-        );
+    if (!game.scoresNeverNeedDrawing && game.scoresNeedDrawing) {
+        drawScores(game.ui, game.snakes, game.highScores[game.settings.gameMode], game.settings.onlyAI);
+        game.scoresNeedDrawing = false;
     }
-
-    // Draw highscore:
-    write(
-        ui,
-        textSizeM,
-        "right",
-        "bottom",
-        ("Highscore: " +game.highScore),
-        ui.canvas.width - 5 * sf ,
-        ui.canvas.height - 2 * sf
-    );
-
-    // Draw debug squares:
-    for(var iDebug = 0; iDebug < game.debugSquares.length; iDebug++) {
-        paintSmallCell("pink", game.debugSquares[iDebug].x, game.debugSquares[iDebug].y);
-    }
-
 
     // If you died this update, stop touch, start it again after 0.5s, and show dead message.
     if (game.results.winner && (game.state.finalUpdate && !game.state.gameOver) || (ui.redrawEnd && game.state.gameOver)) {
@@ -255,35 +290,39 @@ export function render(game) {
         if (game.snakes.length === 1) {
             winnerText = ("You dead, score: " + game.snakes[0].score);
         } else {
-            // TODO: Improve > 1 player mode score display so it doesn't go off edges if too long
-
-          if (!game.results.draw) {
-            winnerText = (winningSnake.name + " Wins!");
-          } else {
-            winnerText = "Draw!";
-          }
-          for (snakeI = 0; snakeI < game.snakes.length; snakeI++) {
-            theScores += (game.snakes[snakeI].name + ": " + game.snakes[snakeI].score + "<br>");
-          }
+            if (!game.results.draw) {
+                winnerText = (winningSnake.name + " Wins!");
+            } else {
+                winnerText = "Draw!";
+            }
+            for (let i = 0; i < game.snakes.length && i < 10; i++) {
+                let snake = game.snakes[i];
+                theScores += (snake.name + ": " + snake.score + "<br>");
+            }
         }
         theScores += ("Press space or tap to restart");
-        write(ui, textSizeL, "center", "bottom", winnerText, w/2, h/2);
-        write(ui, textSizeM, "center", "top", theScores, w/2, h/2);
+        write(ui.textCtx, textSizeL, ui.textColor, "center", "bottom", winnerText, w/2, h/2);
+        write(ui.textCtx, textSizeM, ui.textColor, "center", "top", theScores, w/2, h/2);
         //updateInterval = 500;
         game.state.gameOver = true; // To make sure text only rendered once after death.
 
-        if (snakes.length === 2) {
-          if (snakes[0].score > snakes[1].score) game.wins.AI1++;
-          if (snakes[0].score < snakes[1].score) game.wins.AI2++;
+        if (game.snakes.length === 2) {
+            if (game.snakes[0].score > game.snakes[1].score) game.wins.AI1++;
+            if (game.snakes[0].score < game.snakes[1].score) game.wins.AI2++;
         }
 
       }
 
       // Print the snake properties to two big textboxes:
+      var snakeInfoLeft = document.getElementById("snakeInfoLeft");
+      var snakeInfoRight = document.getElementById("snakeInfoRight");
       if (game.settings.debug) {
-          var snakeInfoLeft, snakeInfoRight;
-          if (snakes[0]) document.getElementById("snakeInfoLeft").innerHTML = snakeInfo(snakes[0], game.state.paused, game.wins);
-          if (snakes[1]) document.getElementById("snakeInfoRight").innerHTML = snakeInfo(snakes[1], game.state.paused, game.wins);
+          if (game.snakes[0] && snakeInfoLeft) {
+              snakeInfoLeft.innerHTML = snakeInfo(game.snakes[0], game.state.paused, game.wins);
+          }
+          if (game.snakes[1] && snakeInfoRight) {
+              snakeInfoRight.innerHTML = snakeInfo(game.snakes[1], game.state.paused, game.wins);
+          }
       }
 
 }

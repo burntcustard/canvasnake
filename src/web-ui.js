@@ -85,39 +85,70 @@ function toggleAutoRepeat() {
 
 function setGameMode(gameMode) {
     window.game.settings.gameMode = gameMode;
-    console.log(gameMode);
     if (window.game.state.running) {
         window.game.newGame(window.game);
     }
 }
 
 
-// Should be 'selectGameMode(+1 or -1 or "Single Player etc")' //
-function incrementGameMode() {
 
-    function getIndexOf(collection, node) {
+/**
+ * Selects a game mode specified by the argument. This function updates the UI,
+ * and then calls setGameMode() to set it as the new game mode. The argument
+ * could be a specific string of the desired game mode, or a string or number
+ * value equating to +1 or -1 to increment or decrement the current game mode.
+ */
+function selectGameMode(gameMode) {
+
+    /**
+     * Searches through the options collection looking for an element with an
+     * innerHTML that matches the query string. If none is found, no value is
+     * returned (undefined). Note that this is NOT case sensitive.
+     *
+     * @param   {HTMLCollection} collection
+     * @param   {String}         query
+     * @returns {Element object} A reference to an HTML element.
+     */
+    function getElementByOptionStr(collection, query) {
         for (var i = 0; i < collection.length; i++) {
-          if (collection[i] === node)
-            return i;
+            if (collection[i].innerHTML.toLowerCase() === query.toLowerCase()) {
+                return collection[i];
+            }
         }
-        return -1;
     }
 
-    let gameModeButton = document.getElementById("gamemode"),
+    var gameModeButton = document.getElementById("gamemode"),
         options = gameModeButton.parentNode.getElementsByClassName("option"),
         selected = gameModeButton.parentNode.getElementsByClassName("selected")[0],
-        index = getIndexOf(options, selected);
+        index = [].indexOf.call(options, selected),
+        gameModeStr = "";
 
-    selected.classList.remove("selected");
+    // Un-highlight the previously selected UI option (if there is one)
+    if (selected) selected.classList.remove("selected");
 
-    if (index < options.length-1) {
-        selected = options[index+1];
+    // Incrementing or decrementing game mode
+    if (gameMode == 1 || gameMode == -1) {
+        let gameModeInt = parseInt(gameMode, 10);
+        if (index + gameModeInt > options.length-1) {
+            selected = options[0];
+        } else if (index + gameModeInt < 0) {
+            selected = options[options.length-1];
+        } else {
+            selected = options[index + gameModeInt];
+        }
+        gameModeStr = selected.innerHTML;
+
+    // Setting game mode to specific string
     } else {
-        selected = options[0];
+        selected = getElementByOptionStr(options, gameMode);
+        if (!selected) console.warn("There is no \"" + gameMode + "\" game mode UI option");
+        gameModeStr = gameMode;
     }
-    selected.classList.add("selected");
 
-    setGameMode(selected.innerHTML);
+    // Highlight the newly selected UI option (if there is one)
+    if (selected) selected.classList.add("selected");
+
+    setGameMode(gameModeStr);
 
 }
 

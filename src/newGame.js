@@ -6,14 +6,15 @@ import { Snake } from './snake.js';
 
 export default function newGame(game) {
 
-    var s, name, randomStart; // Variables for dynamic snake generation.
-
     // Clear / reset stuff
     game.state.gameOver = false;
+    game.state.firstTurn = true;
+    game.state.paused = false;
     game.foodArray = [];
     game.snakes = [];
     game.results.winner = null;
     game.results.draw = false;
+    game.scoresNeverNeedDrawing = false;
 
     // Create the first bit of food/s. Could be put in switch (gameMode) if more food is needed.
     spawnFood(game);
@@ -21,12 +22,12 @@ export default function newGame(game) {
     // Create new snakes based off the game mode
     switch (game.settings.gameMode.toLowerCase()) {
 
-        /*** EXAMPLE OF A GAMEMODE ***
+        /* === GAMEMODE EXAMPLE === //
         case "name of game mode" :
-            snakes = [            // Create array of snakes
+            snakes = [                // Create array of snakes
                 new Snake(
                     "name string",    // Must be "AI 1" or "AI 2" for win recording.
-                    "color string",   // Can be any valid CSS color format. null = black.
+                    "color string",   // Can be any valid CSS color format, or null = black.
                     speed int,        // Useful for testing AI. Smaller number = slower.
                     {ai parameters},  // null = {difficulty: "no AI"}.
                     "AI type string",  OR  ["array", "of", "control", "strings"],
@@ -35,7 +36,7 @@ export default function newGame(game) {
                 )
             ];
         break;
-        *** END OF EXAMPLE ***/
+        // === END OF EXAMPLE === */
 
         case "single player" :
             game.snakes = [
@@ -66,7 +67,7 @@ export default function newGame(game) {
                     "AI",
                     "purple",
                     200,
-                    {avoidance: {walls: true, snakes: true, tubes: true}, lazy: true, suicideOnWin: true},
+                    {avoidance: {walls: true, snakes: true, tubes: true}, lazy: false, suicideOnWin: true},
                     "Normal AI",
                     'S',
                     [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
@@ -135,7 +136,7 @@ export default function newGame(game) {
                     "AI 1",
                     null,
                     20,
-                    {avoidance: {walls: true, snakes: true, tubes: false}, lazy: false, suicideOnWin: true},
+                    {avoidance: {walls: true, snakes: true, tubes: true}, lazy: false, suicideOnWin: true},
                     "Normal AI",
                     'S',
                     [{x: 10, y: 7}, {x: 10, y: 6}, {x: 10, y: 5}]
@@ -154,7 +155,7 @@ export default function newGame(game) {
 
         case "crazy ai" :
         // Crazy lots of snakes
-            for (s = 1; s <= 40; s++) {
+            for (var s = 1; s <= 40; s++) {
                 game.snakes.push(new Snake(
                     "AI " + s,
                     '#'+(Math.random() * 0xFFFFFF << 0).toString(16),
@@ -168,8 +169,24 @@ export default function newGame(game) {
                     }]
                 ));
             }
+            game.scoresNeverNeedDrawing = true;
         break;
 
+        default: console.error(
+            "There is no \"" + game.settings.gameMode + "\" game mode"
+        );
+
+    }
+
+    game.settings.onlyAI = true;
+    game.snakes.forEach(function(snake) {
+       if (!snake.ai) {
+           game.settings.onlyAI = false;
+       }
+    });
+
+    if (game.highScores[game.settings.gameMode] === undefined) {
+        game.highScores[game.settings.gameMode] = 0;
     }
 
     if (typeof game.gameLoop !== "undefined") {
