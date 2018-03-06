@@ -1,6 +1,8 @@
 
 /*global updateSSAAMenuItem*/
 
+import { render } from './view.js';
+
 
 
 export const SSAA = {
@@ -14,6 +16,7 @@ export const SSAA = {
             window.reScaleGame(window.game.ui, this.current);
         }
         updateSSAAMenuItem(this.current);  // Update the SSAA menu item.
+        render(window.game, true);
     },
     
     increment: function() {

@@ -178,10 +178,10 @@ export default function newGame(game) {
 
     }
 
-    game.settings.onlyAI = true;
+    game.state.onlyAI = true;
     game.snakes.forEach(function(snake) {
        if (!snake.ai) {
-           game.settings.onlyAI = false;
+           game.state.onlyAI = false;
        }
     });
 

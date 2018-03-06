@@ -206,7 +206,7 @@ Snake.prototype.update = function(game) {
     if (foodNommed) {
         foodNommed.getEatenBy(this);
         if (!this.highScoreDisabled) {
-            updateHighScore(this, game.highScores, game.settings.gameMode, game.settings.onlyAI);
+            updateHighScore(this, game.highScores, game.settings.gameMode, game.state.onlyAI);
         }
         game.scoresNeedDrawing = true;
     } else {

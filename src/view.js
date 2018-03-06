@@ -284,7 +284,7 @@ export function drawEndScreen(ui, snakes, results) {
 
 
 
-export function render(game) {
+export function render(game, forceTextRender) {
 
     var ui = game.ui;
 
@@ -292,7 +292,7 @@ export function render(game) {
     ui.clear(ui.gameCtx);
 
     // If it's the first turn of the game (and therefore the first render pass):
-    if (game.state.firstTurn) {
+    if (game.state.firstTurn || forceTextRender) {
         ui.clear(ui.textCtx);  // Clear the old scores and/or end screen.
         if (!game.scoresNeverNeedDrawing) game.scoresNeedDrawing = true;
     }
@@ -318,7 +318,7 @@ export function render(game) {
             game.ui,
             game.snakes,
             game.highScores[game.settings.gameMode],
-            game.settings.onlyAI
+            game.state.onlyAI
         );
         game.scoresNeedDrawing = false;
     }

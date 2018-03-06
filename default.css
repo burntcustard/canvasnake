@@ -29,6 +29,7 @@ body {
     display: flex;
     font-family: 'silkscreen';
     font-size: var(--text-size-small);
+    line-height: 1;  /* Different browsers set to different values by default */
     color: var(--text-color-light);
     text-shadow: 0px 1px 4px rgba(0,0,0,0.2);
     user-select: none;  /* Any selectable text must overwrite this */

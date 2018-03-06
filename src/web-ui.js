@@ -36,8 +36,9 @@ function init() {
 function shareScore() {
     var score = window.game.highScores[window.game.settings.gameMode] || 0,
         twitterURL = "https://twitter.com/home/?status=",
-        tweetScore = "I scored " + score + " at burnt.io/canvasnake!";
-    window.open(twitterURL + tweetScore, "_blank");
+        whoScored = window.game.state.onlyAI ? "The AI" : "I",
+        tweetScore = " scored " + score + " at burnt.io/canvasnake!";
+    window.open(twitterURL + whoScored + tweetScore, "_blank");
 }
 
 

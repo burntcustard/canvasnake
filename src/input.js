@@ -87,6 +87,7 @@ export function get(game, document, canvas) {
             key.preventDefault();
             if (game.settings.debug) { console.log("Keypress detected: " + input); }
             handleInput(input, game);
+            input = null;  // In case it's keeps it's value next keypress...
             //return input;
         } else {
             if (game.settings.debug) { console.log("Unknown keypress detected: " + key.which); }
