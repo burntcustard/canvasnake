@@ -34,10 +34,57 @@ function init() {
 
 
 function shareScore() {
-    var twitter = "https://twitter.com/home/?status=";
-    //https://twitter.com/share?url=https%3A%2F%2Fdev.twitter.com%2Fweb%2Ftweet-button
-    var tweetScore = "I scored "+localStorage.highScore+" at burnt.io/canvasnake!";
-    window.open(twitter+tweetScore,"_blank");
+    var score = window.game.highScores[window.game.settings.gameMode] || 0,
+        twitterURL = "https://twitter.com/home/?status=",
+        tweetScore = "I scored " + score + " at burnt.io/canvasnake!";
+    window.open(twitterURL + tweetScore, "_blank");
+}
+
+
+
+function clearHighScores() {
+    
+    var game = window.game;
+    
+    if (game.highScores) {
+        game.highScores = {};
+    }
+    
+    if (game.settings.gameMode) {
+        game.highScores[game.settings.gameMode] = 0;
+    }
+    
+    if (game.ui && game.ui.clear) {
+        game.ui.drawScores(
+            game.ui,
+            game.snakes,
+            0,
+            game.settings.onlyAI
+        );
+        if (game.state.gameOver === true) {
+            game.ui.drawEndScreen(
+                game.ui,
+                game.snakes,
+                game.results
+            );
+        }
+    }
+    
+    localStorage.setItem("snakeHighScores", JSON.stringify(game.highScores));
+}
+
+
+
+function togglePause() {
+    var text;
+    if (!window.game.state.paused) {
+        window.game.state.paused = true;
+        text = "<span>Unpause</span>";
+    } else {
+        window.game.state.paused = false;
+        text = "<span>Pause</span>";
+    }
+    document.getElementById("pause").innerHTML = text;
 }
 
 

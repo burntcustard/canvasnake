@@ -9,7 +9,7 @@ export default function newGame(game) {
     // Clear / reset stuff
     game.state.gameOver = false;
     game.state.firstTurn = true;
-    game.state.paused = false;
+    //game.state.paused = false;
     game.foodArray = [];
     game.snakes = [];
     game.results.winner = null;
@@ -68,7 +68,7 @@ export default function newGame(game) {
                     "purple",
                     200,
                     {avoidance: {walls: true, snakes: true, tubes: true}, lazy: false, suicideOnWin: true},
-                    "Normal AI",
+                    null,
                     'S',
                     [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
                 )
@@ -133,20 +133,20 @@ export default function newGame(game) {
         case "ai vs ai" :
             game.snakes = [
                 new Snake(
-                    "AI 1",
+                    "Regular AI",
                     null,
                     20,
                     {avoidance: {walls: true, snakes: true, tubes: true}, lazy: false, suicideOnWin: true},
-                    "Normal AI",
+                    null,
                     'S',
                     [{x: 10, y: 7}, {x: 10, y: 6}, {x: 10, y: 5}]
                 ),
                 new Snake(
-                    "AI 2",
+                    "Lazy AI",
                     "purple",
                     20,
                     {avoidance: {walls: true, snakes: true, tubes: true}, lazy: true, suicideOnWin: true},
-                    "Lazy AI",
+                    null,
                     'S',
                     [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
                 )
@@ -161,7 +161,7 @@ export default function newGame(game) {
                     '#'+(Math.random() * 0xFFFFFF << 0).toString(16),
                     20,
                     {avoidance: {walls: true, snakes: true, tubes: true}, lazy: false, suicideOnWin: false},
-                    "Normal AI",
+                    null,
                     'S',
                     [{
                         x: Math.floor((Math.random() * 26) + 2),
@@ -187,6 +187,7 @@ export default function newGame(game) {
 
     if (game.highScores[game.settings.gameMode] === undefined) {
         game.highScores[game.settings.gameMode] = 0;
+        localStorage.setItem("snakeHighScores", JSON.stringify(game.highScores));
     }
 
     if (typeof game.gameLoop !== "undefined") {

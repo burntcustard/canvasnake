@@ -2,7 +2,7 @@
 import { SSAA } from './ssaa.js';
 import * as input from './input.js';
 import newGame from './newGame.js';
-import { render, reScale } from './view.js';
+import { render, reScale, drawScores, drawEndScreen } from './view.js';
 import { update } from './update.js';
 import { snakeInfo as snakeInfo } from './infoString.js';
 
@@ -35,7 +35,9 @@ window.game = {
         scale: 1,      // "Scale factor" used to scale (1x, 2x, size etc.)
         bgColor: "white",
         textColor: "orangered",
-        redrawEnd: false  // Used to indicate that the game over message should be redrawn.
+        redrawEnd: false,  // Used to indicate that the game over message should be redrawn.
+        drawScores: drawScores,
+        drawEndScreen: drawEndScreen
     },
 
     results: {
@@ -82,33 +84,32 @@ window.canvasnake = function() {
         ctx.clearRect(0, 0, game.ui.canvas.width, game.ui.canvas.height);
     };
 
-    game.getCombinedScore = function() {
-
-        var snakeI = 0,
-            combinedScore = 0;
-
-        for (snakeI; snakeI < game.snakes.length; snakeI++) {
-            combinedScore += game.snakes[snakeI].score;
-        }
-
-        return combinedScore;
-
-    };
+    // Intialize localstorage/highscores:
+    // Uncomment this to fix (reset) localStorage if it got messed up:
+    //localStorage.setItem("snakeHighScores", null);
+    game.highScores = JSON.parse(localStorage.getItem("snakeHighScores"));
+    if (!game.highScores) {
+        game.highScores = {};
+    }
 
     // This actually creates a listener function which then does something with any inputs that are detected:
     input.get(game, document, game.ui.canvas);  // TODO: Figure out if whole document has to be used?)
 
     game.mainLoopFunc = function mainLoop() {
 
-        var snakeI;
-
         // Clear debug squares array so they can be repopulated this turn:
         if (!game.step) { game.debugSquares = []; }
 
         if (!game.state.gameOver || game.ui.redrawEnd) {
 
-            if (!game.state.paused) {
+            if (!game.state.paused || game.step) {
                 update(game);
+                render(game);
+                game.step = false;
+            }
+            
+            // We need to render at least once even if not updating
+            if (game.state.paused && game.state.firstTurn) {
                 render(game);
             }
 
@@ -120,9 +121,9 @@ window.canvasnake = function() {
 
             // Set game speed (will be different only if you ate something, but not worth if-ing)
             game.updateInterval = 0;
-            for (snakeI = 0; snakeI < game.snakes.length; snakeI++) {
-                game.updateInterval += game.snakes[snakeI].speed;
-            }
+            game.snakes.forEach(snake => {
+                game.updateInterval += snake.speed;
+            });
             game.updateInterval = (game.updateInterval / game.snakes.length);
             clearInterval(game.gameLoop);
             game.gameLoop = setInterval(game.mainLoopFunc, game.updateInterval);
@@ -133,7 +134,7 @@ window.canvasnake = function() {
     window.game = game;
     game.state.running = true;
 
-  // Check if the canvas' size is set correctly:
+    // Check if the canvas' size is set correctly:
     if (game.ui.canvas.width % game.ui.cellSize === 0 || game.ui.canvas.height % game.ui.cellSize === 0) {
         game.board.w = game.ui.canvas.width / game.ui.cellSize;
         game.board.h = game.ui.canvas.height / game.ui.cellSize;

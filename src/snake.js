@@ -13,7 +13,7 @@ export function Snake(name, color, speed, ai, controls, direction, coords) {
     this.name = name || "player X";
     this.score = 0;
     this.dead = false;
-    this.controls = controls || "none";
+    this.controls = controls;
     this.color = color || "black";
 
     // Location & movement properties
@@ -43,6 +43,7 @@ export function Snake(name, color, speed, ai, controls, direction, coords) {
     }
 
 }
+
 
 
 /**
@@ -78,9 +79,9 @@ Snake.prototype.updateDirection = function() {
 Snake.prototype.updateFoodDistance = function(foods) {
 
     var tmp = {};
-    
+
     this.foodDistance = {};
-    
+
     foods.forEach((food) => {
 
         // Distance from food
@@ -110,7 +111,7 @@ Snake.prototype.updateCenterDistance = function(board) {
     var x = (board.w / 2) - this.head.x,
         y = (board.h / 2) - this.head.y,
         total = Math.abs(x) + Math.abs(y);
-    
+
     this.centerDistance = {x: x, y: y, total: total};
 
 };
@@ -127,10 +128,10 @@ Snake.prototype.updateBlocked = function(board, snakes) {
 
     // To start off with we assume the cells are no blocked:
     this.blocked = {N: false, E: false, S: false, W: false};
-    
+
     var x = this.head.x,
         y = this.head.y;
-    
+
     // Check if blocked by walls:
     if (checkCollision(x    , y - 1, board)) this.blocked.N = Obstacle.WALL;
     if (checkCollision(x + 1, y    , board)) this.blocked.E = Obstacle.WALL;
@@ -151,36 +152,36 @@ Snake.prototype.updateBlocked = function(board, snakes) {
 
 
 Snake.prototype.updateProperties = function(game) {
-  
+
     this.updateFoodDistance(game.foodArray);
     this.updateCenterDistance(game.board);
     this.updateBlocked(game.board, game.snakes);
-    
+
     if (this.ai) {
         ai.updateAIProperties(this, game);
     }
-    
+
 };
 
 
 
 Snake.prototype.update = function(game) {
-    
+
     var nx, ny;
-    
+
     this.updateProperties(game);
-    
+
     // Pick direction for AI controlled snakes
     if ((this.ai && this.ai.dizzy === false) &&
         !(this.ai.alone && this.winning && this.ai.suicideOnWin)) {
         ai.chooseDirection(this, game);
     }
-    
+
     // Update which way the snake is going:
     this.updateDirection();
-    
+
     //console.log(this.blocked);
-    
+
     if (this.blocked[this.direction]) {
         this.dead = true;
         if (game.settings.debug) {
@@ -200,7 +201,7 @@ Snake.prototype.update = function(game) {
         case 'S': ny++; break;
         case 'W': nx--; break;
     }
-    
+
     var foodNommed = checkCollision(nx, ny, game.foodArray);
     if (foodNommed) {
         foodNommed.getEatenBy(this);
@@ -214,7 +215,7 @@ Snake.prototype.update = function(game) {
         // Remove last tail segment:
         this.coords.pop();
     }
-    
+
     // Add a new item into the coords array for the new head. this.head remains pointing
     // to the old head, now residing in coords[1], so that's updated to point to coords[0].
     this.coords.unshift({ x: nx, y: ny });

@@ -21,7 +21,7 @@
                 <canvas id="gameCanvas" width="450" height="450">Error loading canvasnake :(</canvas>
                 <canvas id="textCanvas" width="450" height="450"></canvas>
                 <div id="qr-container">
-                    <img src="https://i.imgur.com/WereCeb.png" id="qrCode" alt="QR code">
+                    <img src="img/qrLogo.png" id="qrCode" alt="QR code">
                 </div>
             </div>
 
@@ -42,9 +42,9 @@
                                 <div class="option">Three player</div>
                                 <div class="option">AI vs AI</div>
                             </li>
-                            <li class="button">
-                                <div><span>Show&nbsp;AI&nbsp;info</span></div>
-                                <div class="description shortcut">Shortcut: /</div>
+                            <li class="button" onclick="clearHighScores();">
+                                <div><span>Clear high scores</span></div>
+                                <div class="description">Resets all high scores</div>
                             </li>
                             <li class="button" onclick="incrementSSAA();">
                                 <div id="SSAA">
@@ -58,13 +58,14 @@
                                 <div id="autoRepeat">
                                     <span>Auto-repeat:</span> false
                                 </div>
-                                <div class="description">Shortcut: R</div>
+                                <div class="description shortcut">Shortcut: R</div>
                             </li>
-                            <li>
-                                <div>
-                                    <span>Keys</span>
+                            <li class="button" onclick="togglePause();">
+                                <div id="pause">
+                                    <span>Pause</span>
                                 </div>
-                                <div class="description shortcut">Pause: P</div>
+                                <div class="description shortcut">Shortcut: P</div>
+                                <div class="description shortcut">Next step shortcut: N</div>
                             </li>
                         </ul>
                     </div>
@@ -76,7 +77,7 @@
                 <div id="slider-mobile" class="slider bottom small">
                     <p>
                         Scan QR code with an app like
-                        <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.unveil" title="Google Goggles on the Play Store" target="_blank">Google&nbsp;Goggles</a> to play on mobile.
+                        <a href="https://play.google.com/store/apps/details?id=com.mobile.qrcodereader" title="QR Code Reader on the Play Store" target="_blank">this&nbsp;one</a> to play on mobile.
                         <a id="showQRLink" title="Not working? Instead, go to: burnt.io/canvasnake" href="#" onclick="init(); return false;">Show&nbsp;QR</a>
                     </p>
                     <img src="https://i.imgur.com/PZkYSs8.png" alt="mobile logo" />

@@ -194,8 +194,13 @@ function write(ctx, size, color, xAlign, yAlign, text, x, y) {
 
 
 
-function drawScores(ui, snakes, highScore, onlyAI) {
+export function drawScores(ui, snakes, highScore, onlyAI) {
 
+    // If UI doesn't exist properly yet then we can't do anything:
+    if (ui === undefined || ui.clear === undefined) {
+        return;
+    }
+    
     ui.clear(ui.textCtx);
 
     // Draw scores:
@@ -213,20 +218,67 @@ function drawScores(ui, snakes, highScore, onlyAI) {
     }
 
     // Draw highscore:
-    if (highScore !== undefined) {
-        let highScoreText = "HighScore: " + highScore;
-        if (onlyAI) highScoreText = "AI " + highScoreText;
-        write(
-            ui.textCtx,
-            ui.textSize,
-            ui.textColor,
-            "right",
-            "bottom",
-            highScoreText,
-            ui.canvas.width - 5 * ui.scale,
-            ui.canvas.height - 2 * ui.scale
-        );
+    if (highScore === undefined) {
+        highScore = 0;
     }
+    let highScoreText = "HighScore: " + highScore;
+    if (onlyAI) highScoreText = "AI " + highScoreText;
+    write(
+        ui.textCtx,
+        ui.textSize,
+        ui.textColor,
+        "right",
+        "bottom",
+        highScoreText,
+        ui.canvas.width - 5 * ui.scale,
+        ui.canvas.height - 2 * ui.scale
+    );
+
+}
+
+
+
+export function drawEndScreen(ui, snakes, results) {
+
+    var winningSnake = results.winner,
+        winnerText = "",
+        draw = false,
+        theScores = "";
+    
+    if (snakes.length === 1) {
+        winnerText = ("You dead, score: " + snakes[0].score);
+        
+    } else {
+        if (!results.draw) {
+            winnerText = (winningSnake.name + " Wins!");
+        } else {
+            winnerText = "Draw!";
+        }
+        for (let i = 0; i < snakes.length && i < 10; i++) {
+            theScores += (snakes[i].name + ": " + snakes[i].score + "<br>");
+        }
+    }
+    theScores += ("Press space or tap to restart");
+    write(
+        ui.textCtx,
+        ui.textSize * 2,
+        ui.textColor,
+        "center",
+        "bottom",
+        winnerText,
+        ui.canvas.width / 2,
+        ui.canvas.height / 2
+    );
+    write(
+        ui.textCtx,
+        ui.textSize,
+        ui.textColor,
+        "center",
+        "top",
+        theScores,
+        ui.canvas.width / 2,
+        ui.canvas.height / 2
+    );
 
 }
 
@@ -234,12 +286,7 @@ function drawScores(ui, snakes, highScore, onlyAI) {
 
 export function render(game) {
 
-    var ui = game.ui,
-        textSizeM = ui.textSize,
-        textSizeL = ui.textSize * 2,
-        sf = ui.scale,
-        w = ui.canvas.width,
-        h = ui.canvas.height;
+    var ui = game.ui;
 
     // Clear entire game canvas:
     ui.clear(ui.gameCtx);
@@ -267,7 +314,12 @@ export function render(game) {
 
     // Draw scores:
     if (!game.scoresNeverNeedDrawing && game.scoresNeedDrawing) {
-        drawScores(game.ui, game.snakes, game.highScores[game.settings.gameMode], game.settings.onlyAI);
+        drawScores(
+            game.ui,
+            game.snakes,
+            game.highScores[game.settings.gameMode],
+            game.settings.onlyAI
+        );
         game.scoresNeedDrawing = false;
     }
 
@@ -283,26 +335,7 @@ export function render(game) {
                 qrContainer.addEventListener   ("touchstart", touched);
             }, 500);
         }
-        var winningSnake = game.results.winner,
-            winnerText = "",
-            draw = false,
-            theScores = "";
-        if (game.snakes.length === 1) {
-            winnerText = ("You dead, score: " + game.snakes[0].score);
-        } else {
-            if (!game.results.draw) {
-                winnerText = (winningSnake.name + " Wins!");
-            } else {
-                winnerText = "Draw!";
-            }
-            for (let i = 0; i < game.snakes.length && i < 10; i++) {
-                let snake = game.snakes[i];
-                theScores += (snake.name + ": " + snake.score + "<br>");
-            }
-        }
-        theScores += ("Press space or tap to restart");
-        write(ui.textCtx, textSizeL, ui.textColor, "center", "bottom", winnerText, w/2, h/2);
-        write(ui.textCtx, textSizeM, ui.textColor, "center", "top", theScores, w/2, h/2);
+        drawEndScreen(game.ui, game.snakes, game.results);
         //updateInterval = 500;
         game.state.gameOver = true; // To make sure text only rendered once after death.
 

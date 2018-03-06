@@ -95,6 +95,25 @@ function BananaFood(game) {
 
 
 
+/**
+ * Returns all of the current snakes scores added together. Used in determining
+ * how far the game has progressed and therefore which food type to spawn.
+ * @param   {Array} snakes Array of snakes whose scores to combine.
+ * @returns {number} Combined score.
+ */
+function getCombinedScore(snakes) {
+
+    var combinedScore = 0;
+
+    snakes.forEach(snake => {
+        combinedScore += snake.score;
+    });
+
+    return combinedScore;
+}
+
+
+
 //╔══════════════════════════════╗//
 //║        ■▀                    ║//
 //║   ▄██▄█▄█▄          ╔═════╗  ║//
@@ -109,7 +128,7 @@ function BananaFood(game) {
  */
 export function spawnFood(game) {
 
-    var combinedScore = game.getCombinedScore(),
+    var combinedScore = getCombinedScore(game.snakes),
         foodNumber,
         newFood;
 

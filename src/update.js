@@ -10,7 +10,7 @@ export function updateHighScore(snake, highScores, gameMode, onlyAI) {
     if ((!snake.ai || onlyAI) &&
         (snake.score > highScores[gameMode])) {
         highScores[gameMode] = snake.score;
-        localStorage.highScores = highScores;
+        localStorage.setItem("snakeHighScores", JSON.stringify({highScores}));
     }
 }
 
@@ -32,14 +32,12 @@ export function update(game) {
             snake.update(game);
         }
     });
-    
-    if (game.step) { game.state.paused = true; }
 
     // Update the AI data (again, so that when displayed it shows correct values for the
     // games current state, rather than the games state BEFORE the last snake moved. Also
     // check if the game needs to be ended (all snakes dead):
     game.state.finalUpdate = true;
-    
+
     game.snakes.forEach(function(snake) {
         if (!snake.dead) {
             // Do any TURN SENSITIVE (i.e. only once per turn) AI updates here.

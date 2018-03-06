@@ -1,5 +1,5 @@
 
-/*global toggleAutoRepeat, selectGameMode*/
+/*global toggleAutoRepeat, selectGameMode, togglePause*/
 
 
 
@@ -106,18 +106,18 @@ function handleInput(input, game) {
     switch (input) {
 
         // Game mode selection
-        case "1" : selectGameMode("Single Player");       break;
-        case "2" : selectGameMode("Single Player vs AI"); break;
-        case "3" : selectGameMode("Two Player");          break;
-        case "4" : selectGameMode("Three Player");        break;
+        case "1" : selectGameMode("Single player");       break;
+        case "2" : selectGameMode("Single player vs AI"); break;
+        case "3" : selectGameMode("Two player");          break;
+        case "4" : selectGameMode("Three player");        break;
         case "5" : selectGameMode("AI vs AI");            break;
         case "6" : selectGameMode("Crazy AI");            break;
         case "7" : selectGameMode("Custom");              break;
 
         // Other
-        case "SPACE" : newGame(game); game.state.paused = false; break;
-        case "P"     : game.state.paused = !game.state.paused; break;
-        case "N"     : game.step = true; game.state.paused = false; break;
+        case "SPACE" : newGame(game); break;
+        case "P"     : togglePause(); break;
+        case "N"     : game.step = true; break;
         case "?"     : toggleDebug(game.settings); break;
         case "R"     : toggleAutoRepeat(); break;
         case "]"     : game.settings.ssaa.increment(); break;
@@ -126,7 +126,7 @@ function handleInput(input, game) {
     }
 
     game.snakes.forEach(function(snake) {
-        if (!snake.dead) {
+        if (!snake.dead && snake.controls) {
             if (snake.controls.indexOf("WASD") > -1) {
               switch (input) {
                 case "W" : snake.newDirection = "N"; break;
