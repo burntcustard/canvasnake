@@ -1,5 +1,5 @@
 # Canvasnake
-A snake versus snake game, with single player, local multiplayer, player vs AI, and AI vs AI game modes. Made from scratch using vanilla JavaScript and HTML canvas. A playable (potentially outdated) version can be found here: [burnt.io/canvasnake](http://burnt.io/canvasnake/)
+A snake versus snake game, with single player, local multiplayer, player vs AI, and AI vs AI game modes. Made from scratch using vanilla JavaScript and HTML canvas. A (potentially outdated) version can be played online: [burnt.io/canvasnake](http://burnt.io/canvasnake/)
 
 ![Game screenshot](https://i.imgur.com/kOTDnbk.png)
 
