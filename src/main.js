@@ -113,25 +113,25 @@ window.canvasnake = function() {
                 render(game);
             }
 
+            // It's no longer the first turn:
             if (game.state.firstTurn) game.state.firstTurn = false;
 
             if (game.state.gameOver && game.settings.autoRepeat === true) {
                 newGame(game);
             }
 
-            // Set game speed (will be different only if you ate something, but not worth if-ing)
+            // Set game speed (will be different only if food was eaten)
             game.updateInterval = 0;
             game.snakes.forEach(snake => {
                 game.updateInterval += snake.speed;
             });
-            game.updateInterval = (game.updateInterval / game.snakes.length);
+            game.updateInterval /= game.snakes.length;
             clearInterval(game.gameLoop);
             game.gameLoop = setInterval(game.mainLoopFunc, game.updateInterval);
 
         }
     };
-
-    window.game = game;
+    
     game.state.running = true;
 
     // Check if the canvas' size is set correctly:

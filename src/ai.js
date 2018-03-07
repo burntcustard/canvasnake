@@ -384,7 +384,7 @@ export function chooseDirection(snake, game) {
 
     } else {
 
-        // A lazy snake Can't Be Arsed (cba=true) to go to food if other snake/s are closer.
+        // A lazy snake Can't Be Arsed (cba=true) to go to food if another snake is closer.
         // Lazy ai goes towards the center (+ shape) of the map if it cba to go for food.
         snake.ai.cba = anyOtherSnake((other, self) => other.foodDist.total < self.foodDist.total);
 
