@@ -107,7 +107,7 @@ window.canvasnake = function() {
                 render(game);
                 game.step = false;
             }
-            
+
             // We need to render at least once even if not updating
             if (game.state.paused && game.state.firstTurn) {
                 render(game);
@@ -149,9 +149,6 @@ window.canvasnake = function() {
     setTimeout(function() {
         qrContainer.addEventListener ("touchstart", input.touched);
     }, 999); // The delay is so that.. I have no fucking idea. Plz send help.
-
-    // Assign the highscore as whatever is set in the browsers local storage:
-    if (!localStorage.highScore) { game.highScore = 0; } else { game.highScore = localStorage.highScore; }
 
     // Start a new game!
     newGame(game);

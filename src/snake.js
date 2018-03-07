@@ -35,7 +35,7 @@ export function Snake(name, color, speed, ai, controls, direction, coords) {
         this.softBlocked = {N: false, E: false, S: false, W: false};
         this.blocked = this.hardblocked;  // hardBlocked shorthand.
         // Distance between head & closest food, & it's index:
-        this.foodDistance = {x: 0, y: 0, total: 0, closest: 0};
+        this.foodDist = {x: 0, y: 0, total: 0, closest: 0};
         this.centerDistance = {x: 0, y: 0, total: 0};
         this.movesSinceNommed = 0;
         this.winning = false;
@@ -80,7 +80,7 @@ Snake.prototype.updateFoodDistance = function(foods) {
 
     var tmp = {};
 
-    this.foodDistance = {};
+    this.foodDist = {};
 
     foods.forEach((food) => {
 
@@ -90,8 +90,8 @@ Snake.prototype.updateFoodDistance = function(foods) {
         tmp.total = Math.abs(tmp.x) + Math.abs(tmp.y);
 
         // If first food being looked at, or food is closer than previously closest food:
-        if (!this.foodDistance.total || tmp.total < this.foodDistance.total) {
-            this.foodDistance = {
+        if (!this.foodDist.total || tmp.total < this.foodDist.total) {
+            this.foodDist = {
                 x: tmp.x,
                 y: tmp.y,
                 total: tmp.total,
