@@ -19,6 +19,8 @@ export function updateHighScore(snake, highScores, gameMode, onlyAI) {
 export function update(game) {
 
     var snakeOrder = orderSnakes(game.snakes);
+    
+    if (game.state.finalUpdate) game.state.gameOver = true;
 
     game.debugSquares = [];
 
@@ -42,7 +44,7 @@ export function update(game) {
         if (!snake.dead) {
             // Do any TURN SENSITIVE (i.e. only once per turn) AI updates here.
             game.state.finalUpdate = false;
-            snake.updateProperties(game);
+            //snake.updateProperties(game);
         }
     });
 
@@ -55,6 +57,19 @@ export function update(game) {
                 game.results.draw = false;
             } else if (game.snakes[snakeI].score === game.results.winner.score) {
                 game.results.draw = true;
+            }
+        }
+        // Update AI fitnesses. TODO: Reword.
+        game.snakes.forEach(snake => {
+            if (snake.ai && snake.ai.chromosome) {
+                snake.updateFitness(game.results);
+            }
+        });
+        if (game.ai) {
+            let numOfChromosomes = game.ai.population.chromosomes.length - 1;
+            if (game.ai.popIndexA === numOfChromosomes &&
+                game.ai.popIndexB === numOfChromosomes) {
+                game.ai.population.refresh();
             }
         }
     }

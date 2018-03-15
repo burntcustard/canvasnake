@@ -1,6 +1,8 @@
 
 import { coinToss } from './lib.js';
 import * as ai from './ai.js';
+import * as oldAI from './ai-old.js';
+import * as newAI from './ai-new.js';
 import { Obstacle } from './collision.js';
 import { check as checkCollision } from './collision.js';
 import { updateHighScore } from './update.js';
@@ -33,10 +35,15 @@ export function Snake({
     
     // Give the snake AI properties if an 'ai' parameter object passed in:
     if (ai) {
-        let {lazy = false, suicideOnWin = true, avoidance = {}} = ai;
-        Object.assign(ai, {lazy, suicideOnWin, avoidance});
-        let {walls = true, snakes = true, tubes = true} = ai.avoidance;
-        Object.assign(ai.avoidance, {walls, snakes, tubes});
+        if (ai.chromosome) {
+            let {suicideOnWin = true} = ai;
+            Object.assign(ai, {suicideOnWin});
+        } else {
+            let {lazy = false, suicideOnWin = true, avoidance = {}} = ai;
+            Object.assign(ai, {lazy, suicideOnWin, avoidance});
+            let {walls = true, snakes = true, tubes = true} = ai.avoidance;
+            Object.assign(ai.avoidance, {walls, snakes, tubes});
+        }
         this.ai = ai;
     }
     
@@ -44,7 +51,7 @@ export function Snake({
     this.score = 0;
     this.dead = false;
     this.blocked = {N: false, E: false, S: false, W: false};
-    this.foodDist = {x: 0, y: 0, total: 0, closest: 0};
+    this.foodDist = {x: 0, y: 0, total: 0, oldTotal: 0, closest: 0};
     this.centerDistance = {x: 0, y: 0, total: 0};
     this.movesSinceNommed = 0;
     this.winning = false;
@@ -86,8 +93,12 @@ Snake.prototype.updateDirection = function() {
 Snake.prototype.updateFoodDistance = function(foods) {
 
     var tmp = {};
-
-    this.foodDist = {};
+    
+    this.foodDist.oldTotal = this.foodDist.total;
+    
+    this.foodDist.x = 0;
+    this.foodDist.y = 0;
+    this.foodDist.total = 0;
 
     foods.forEach((food) => {
 
@@ -98,12 +109,10 @@ Snake.prototype.updateFoodDistance = function(foods) {
 
         // If first food being looked at, or food is closer than previously closest food:
         if (!this.foodDist.total || tmp.total < this.foodDist.total) {
-            this.foodDist = {
-                x: tmp.x,
-                y: tmp.y,
-                total: tmp.total,
-                closest: food
-            };
+            this.foodDist.x = tmp.x;
+            this.foodDist.y = tmp.y;
+            this.foodDist.total = tmp.total;
+            this.foodDist.closests = food;
         }
 
     });
@@ -181,7 +190,11 @@ Snake.prototype.update = function(game) {
     // Pick direction for AI controlled snakes
     if ((this.ai && this.ai.dizzy === false) &&
         !(this.ai.alone && this.winning && this.ai.suicideOnWin)) {
-        ai.chooseDirection(this, game);
+        if (this.ai.chromosome) {
+            newAI.chooseDirection(this, game);
+        } else {
+            oldAI.chooseDirection(this, game);
+        }
     }
 
     // Update which way the snake is going:

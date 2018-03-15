@@ -104,7 +104,7 @@ window.canvasnake = function() {
 
             if (!game.state.paused || game.step) {
                 update(game);
-                render(game);
+                if (!game.settings.skipRender) render(game);
                 game.step = false;
             }
 
@@ -121,14 +121,15 @@ window.canvasnake = function() {
             }
 
             // Set game speed (will be different only if food was eaten)
-            game.updateInterval = 0;
-            game.snakes.forEach(snake => {
-                game.updateInterval += snake.speed;
-            });
-            game.updateInterval /= game.snakes.length;
-            clearInterval(game.gameLoop);
-            game.gameLoop = setInterval(game.mainLoopFunc, game.updateInterval);
-
+            if (game.updateInterval !== 0) {
+                game.updateInterval = 0;
+                game.snakes.forEach(snake => {
+                    game.updateInterval += snake.speed;
+                });
+                game.updateInterval /= game.snakes.length;
+                clearInterval(game.gameLoop);
+                game.gameLoop = setInterval(game.mainLoopFunc, game.updateInterval);
+            }
         }
     };
     

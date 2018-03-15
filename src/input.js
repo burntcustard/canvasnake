@@ -87,6 +87,7 @@ export function get(game, document, canvas) {
             case  82: input = "R";     break;
             case 219: input = "[";     break;
             case 221: input = "]";     break;
+            case  72: input = "H";     break;
 
         }
 
@@ -120,7 +121,7 @@ function handleInput(input, game) {
         case "4" : selectGameMode("Three player");        break;
         case "5" : selectGameMode("AI vs AI");            break;
         case "6" : selectGameMode("Crazy AI");            break;
-        case "7" : selectGameMode("Custom");              break;
+        case "7" : selectGameMode("Neuroevolution AI");   break;
 
         // Other
         case "SPACE" : newGame(game); break;
@@ -130,6 +131,7 @@ function handleInput(input, game) {
         case "R"     : toggleAutoRepeat(); break;
         case "]"     : game.settings.ssaa.increment(); break;
         case "["     : game.settings.ssaa.decrement(); break;
+        case "H"     : game.settings.skipRender = !game.settings.skipRender; break;
 
     }
 

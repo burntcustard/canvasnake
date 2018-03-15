@@ -1,6 +1,7 @@
 
 import { spawnFood } from './food.js';
 import { Snake } from './snake.js';
+import { Population } from './ai-nn.js';
 
 
 
@@ -146,6 +147,48 @@ export default function newGame(game) {
             }
             game.scoresNeverNeedDrawing = true;
         break;
+            
+        case "neuroevolution ai" :
+            game.settings.autoRepeat = true;
+            //game.settings.skipRender = true;
+            game.ai = game.ai || {};
+            game.ai.population = game.ai.population || new Population();
+            game.ai.popIndexA = game.ai.popIndexA || 0;
+            game.ai.popIndexB = game.ai.popIndexB || 0;
+            if (game.ai.popIndexB >= game.ai.population.chromosomes.length) {
+                game.ai.popIndexA += 1;
+                game.ai.popIndexB = 0;
+            }
+            if (game.ai.popIndexA >= game.ai.population.chromosomes.length) {
+                // Training round over
+                game.ai.popIndexA = 0;
+                game.ai.popIndexB = 0;
+            }
+            /*
+            let g = game.ai.population.genCounter,
+                a = game.ai.popIndexA,
+                b = game.ai.popIndexB;
+            console.log("Generation: " + g + " | A: " + a + " | B: " + b);
+            */
+            let chromoA = game.ai.population.chromosomes[game.ai.popIndexA];
+            let chromoB = game.ai.population.chromosomes[game.ai.popIndexB];
+            game.snakes = [
+                new Snake({
+                    color: chromoA.color,
+                    ai: {chromosome: chromoA},
+                    speed: 0,
+                    coords: [{x: 10, y: 7}, {x: 10, y: 6}, {x: 10, y: 5}]
+                }),
+                new Snake({
+                    color: chromoB.color,
+                    ai: {chromosome: chromoB},
+                    speed: 0,
+                    coords: [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
+                })
+            ];
+            game.ai.popIndexB++;
+            game.scoresNeverNeedDrawing = true;
+        break;
 
         default: console.error(
             "There is no \"" + game.settings.gameMode + "\" game mode"
@@ -165,6 +208,7 @@ export default function newGame(game) {
         localStorage.setItem("snakeHighScores", JSON.stringify(game.highScores));
     }
 
+    game.updateInterval = 1;
     if (typeof game.gameLoop !== "undefined") {
         clearInterval(game.gameLoop);
     }
