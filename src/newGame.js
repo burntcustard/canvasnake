@@ -1,7 +1,8 @@
 
 import { spawnFood } from './food.js';
 import { Snake } from './snake.js';
-import { Population } from './ai-nn.js';
+import { Population } from './ai/population.js';
+import { isEven, isOdd, coinToss } from './lib.js';
 
 
 
@@ -10,6 +11,8 @@ export default function newGame(game) {
     // Clear / reset stuff
     game.state.gameOver = false;
     game.state.firstTurn = true;
+    game.state.finalUpdate = false;
+    //game.state.paused = false;
     game.foodArray = [];
     game.snakes = [];
     game.results.winner = null;
@@ -133,7 +136,7 @@ export default function newGame(game) {
 
         case "crazy ai" :
         // Crazy lots of snakes
-            for (var s = 1; s <= 40; s++) {
+            for (var s = 1; s <= 200; s++) {
                 game.snakes.push(new Snake({
                     name: "AI " + s,
                     color: '#'+(Math.random() * 0xFFFFFF << 0).toString(16),
@@ -147,40 +150,50 @@ export default function newGame(game) {
             }
             game.scoresNeverNeedDrawing = true;
         break;
-            
+
         case "neuroevolution ai" :
             game.settings.autoRepeat = true;
             //game.settings.skipRender = true;
             game.ai = game.ai || {};
             game.ai.population = game.ai.population || new Population();
-            game.ai.popIndexA = game.ai.popIndexA || 0;
-            game.ai.popIndexB = game.ai.popIndexB || 0;
-            if (game.ai.popIndexB >= game.ai.population.chromosomes.length) {
-                game.ai.popIndexA += 1;
-                game.ai.popIndexB = 0;
+            let population = game.ai.population;  // Short-er hand.
+            game.ai.popIndexA = game.ai.popIndexA || 1;
+            game.ai.popIndexB = game.ai.popIndexB || 1;
+            //game.ai.popIndexB++;
+            if (game.ai.popIndexB > population.roundsPerChromo) {
+                game.ai.popIndexA++;
+                game.ai.popIndexB = 1;
             }
-            if (game.ai.popIndexA >= game.ai.population.chromosomes.length) {
+            if (game.ai.popIndexA > population.size) {
                 // Training round over
-                game.ai.popIndexA = 0;
-                game.ai.popIndexB = 0;
+                game.ai.popIndexA = 1;
+                game.ai.popIndexB = 1;
             }
+            let randomIndex = population.chromosomes.randomIndex();
+            let chromoA = population.chromosomes[game.ai.popIndexA-1];
+            let chromoB = (population.settings.roundsPerChromo ===         
+                           population.settings.populationSize) ?     
+                population.chromosomes[game.ai.popIndexB-1] :
+                population.chromosomes.random();
+            // Remove any starting location bias by maybe swapping spawns:
+            if (coinToss()) [chromoA, chromoB] = [chromoB, chromoA];
             /*
             let g = game.ai.population.genCounter,
                 a = game.ai.popIndexA,
                 b = game.ai.popIndexB;
-            console.log("Generation: " + g + " | A: " + a + " | B: " + b);
-            */
-            let chromoA = game.ai.population.chromosomes[game.ai.popIndexA];
-            let chromoB = game.ai.population.chromosomes[game.ai.popIndexB];
+            console.log("Gen: " + g + " | A: " + a + " | B: " + b);
+            //*/
+            chromoA.roundsPlayed++;
+            chromoB.roundsPlayed++;
             game.snakes = [
                 new Snake({
-                    color: chromoA.color,
+                    color: chromoA.genome.color,
                     ai: {chromosome: chromoA},
                     speed: 0,
                     coords: [{x: 10, y: 7}, {x: 10, y: 6}, {x: 10, y: 5}]
                 }),
                 new Snake({
-                    color: chromoB.color,
+                    color: chromoB.genome.color,
                     ai: {chromosome: chromoB},
                     speed: 0,
                     coords: [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
@@ -208,10 +221,5 @@ export default function newGame(game) {
         localStorage.setItem("snakeHighScores", JSON.stringify(game.highScores));
     }
 
-    game.updateInterval = 1;
-    if (typeof game.gameLoop !== "undefined") {
-        clearInterval(game.gameLoop);
-    }
-    game.gameLoop = setInterval(game.mainLoopFunc, 1);
-
+    game.mainLoopFunc();
 }

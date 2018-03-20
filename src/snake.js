@@ -36,8 +36,9 @@ export function Snake({
     // Give the snake AI properties if an 'ai' parameter object passed in:
     if (ai) {
         if (ai.chromosome) {
-            let {suicideOnWin = true} = ai;
+            let {suicideOnWin = false} = ai;
             Object.assign(ai, {suicideOnWin});
+            //ai.chromosome.roundsPlayed++;
         } else {
             let {lazy = false, suicideOnWin = true, avoidance = {}} = ai;
             Object.assign(ai, {lazy, suicideOnWin, avoidance});
@@ -47,7 +48,7 @@ export function Snake({
         this.ai = ai;
     }
     
-    this.head = this.coords[0];   // Reference to the head coordinates for easy access.
+    this.head = this.coords[0]; // Reference to the head coordinates for easy access.
     this.score = 0;
     this.dead = false;
     this.blocked = {N: false, E: false, S: false, W: false};

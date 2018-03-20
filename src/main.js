@@ -118,10 +118,7 @@ window.canvasnake = function() {
 
             if (game.state.gameOver && game.settings.autoRepeat === true) {
                 newGame(game);
-            }
-
-            // Set game speed (will be different only if food was eaten)
-            if (game.updateInterval !== 0) {
+            } else {
                 game.updateInterval = 0;
                 game.snakes.forEach(snake => {
                     game.updateInterval += snake.speed;
@@ -132,7 +129,7 @@ window.canvasnake = function() {
             }
         }
     };
-    
+
     game.state.running = true;
 
     // Check if the canvas' size is set correctly:

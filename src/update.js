@@ -19,8 +19,13 @@ export function updateHighScore(snake, highScores, gameMode, onlyAI) {
 export function update(game) {
 
     var snakeOrder = orderSnakes(game.snakes);
-    
-    if (game.state.finalUpdate) game.state.gameOver = true;
+ 
+    // Last round was the last update. The game is now over, and
+    // we don't need to update again, so return (exit function):
+    if (game.state.finalUpdate) {
+        game.state.gameOver = true;
+        return;
+    }
 
     game.debugSquares = [];
 
@@ -49,6 +54,8 @@ export function update(game) {
     });
 
     // Game's over. Figure out who won of if it was a draw:
+    // Game is over (but state.gameOver isn't set until update is called again)
+    // Figure out who won and stuff:
     if (game.state.finalUpdate) {
         game.results.winner = game.snakes[0];
         for (let snakeI = 1; snakeI < game.snakes.length; snakeI++) {
@@ -66,9 +73,10 @@ export function update(game) {
             }
         });
         if (game.ai) {
-            let numOfChromosomes = game.ai.population.chromosomes.length - 1;
-            if (game.ai.popIndexA === numOfChromosomes &&
-                game.ai.popIndexB === numOfChromosomes) {
+            // A fought B-1, (because before this gets printed B gets incremented).
+            //console.log("A: " + game.ai.popIndexA + " | B: " + game.ai.popIndexB);
+            if (game.ai.popIndexA === game.ai.population.size &&
+                game.ai.popIndexB > game.ai.population.roundsPerChromo) {
                 game.ai.population.refresh();
             }
         }
