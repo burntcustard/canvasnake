@@ -22,7 +22,7 @@ export function Genome(inputs, hiddenLayers, neuronsPerLayer, outputs, weights) 
     // Weights haven't been specified so randomly generate some:
         let numOfWeights = inputs;  // One weight for each input neuron bias.
         numOfWeights += (inputs + 1) * neuronsPerLayer;
-        numOfWeights += Math.pow(neuronsPerLayer + 1, 2) * (hiddenLayers - 1);
+        numOfWeights += ((neuronsPerLayer + 1) * neuronsPerLayer) * (hiddenLayers - 1);
         numOfWeights += (neuronsPerLayer + 1) * outputs;
         // Make array of x length that's all initialized to 0 (super speedy):
         this.weights = new Float32Array(numOfWeights);
@@ -52,7 +52,7 @@ Genome.prototype.getMutatedWeights = function() {
 
 
 /**
- * Mutates a neural network's genome (i.e. mutates a chromosome).
+ * Mutates a neural network's genome (i.e. mutates an organism).
  * A random weight in the genome is chosen to mutate, and then a
  * replacement weight value is chosen. The mutation amount
  * @param {number} amount   How much the original weight value should
@@ -67,13 +67,13 @@ Genome.prototype.mutate = function(
     amountToMutate = settings.mutationAmount,
     numberToMutate = settings.mutationNumber,
     tendancy = settings.mutationTendancy,
-    flipWeightRate = 0.1, //0.001,     
-    newWeightRate = 0,  //0.001,
+    flipWeightRate = 0, //0.001,     
+    newWeightRate = 1,  //0.001,
     maxWeightRate = 0,  //0.001,
     minWeightRate = 0,  //0.001,
-    zeroWeightRate = 0.1, //0.001,
-    posWeightRate = 0.4, //0.05,
-    negWeightRate = 0.4  //0.05
+    zeroWeightRate = 0, //0.001,
+    posWeightRate = 0, //0.05,
+    negWeightRate = 0  //0.05
 ) {
     
     var threshold = new Float64Array(7);
@@ -93,9 +93,10 @@ Genome.prototype.mutate = function(
     //*/
     
     //this.weights.forEach((objectRef, i, weights) => {
-    numberToMutate = Math.random() * 2;
-    for (let i = 0; i < numberToMutate; i++) {
-        let i = this.weights.randomIndex();
+    this.mutated = numberToMutate = 1 + Math.floor(randomWeightedLow() * 9);
+    let i = this.weights.randomIndex();
+    for (let j = 0; j < numberToMutate; j++) {
+        if (++i === this.weights.length) i = 0;  // Increment/overflow.
         let chance = Math.random();
         if (chance < threshold[0]) {
             this.weights[i] = -this.weights[i];
@@ -129,7 +130,29 @@ Genome.prototype.mutate = function(
     }
     //*/
     
-    this.mutated = true;
+    //this.mutated = true;
     this.color = randomColor();
 
 };
+
+
+
+Genome.prototype.save = function(population) {
+    
+    // Save as a copy of the genome:
+    let genome = JSON.parse(JSON.stringify(this));
+    
+    // Add the generation counter:
+    genome.created = "gen" + this.genCounter;
+    
+    // Save neural network topology:
+    genome.topology = [];
+    population.organisms[0].layers.forEach(layer => {
+        genome.topology.push(layer.length);
+    });
+    
+    // Don't need the original starting weights of the saved genome
+    delete genome.baseWeights;
+    
+    return genome;
+}

@@ -1,12 +1,18 @@
 
-import { softsign, ReLU } from './functions.js';
+import * as func from './functions.js';
 
 
-
-export function Neuron(weights) {
-    this.weights = weights;  // E.g. [0.5, 0.4, 0.3]
+export function Neuron(weights, genomeLocation, activFunc = func.softsign) {
+    this.weights = weights;  // E.g. [0.5, 0.4, -0.3]
+    this.genomeLocation = genomeLocation;
     this.inputs = new Float32Array(Math.max(1, weights.length - 1));
-    this.activationFunction = softsign;
+    this.activationFunction = activFunc;
+    this.output = null;
+    this.maxOutput = null;
+    this.maxOutputPos = 0;
+    this.maxOutputNeg = 0;
+    this.maxOutputRng = 0;
+    this.avgOutput = 0;
 }
 
 Neuron.prototype.activate = function(inputs) {
@@ -21,16 +27,30 @@ Neuron.prototype.activate = function(inputs) {
         // Add bias:
         netInput += this.weights[0];
     } else {
-        //netInput = this.inputs[0] * 2;
-        // Switched to just pass-through inputs:
-        this.output = Math.round(inputs[0] * 1e2) / 1e2;
-        return inputs[0];
+        netInput = this.inputs[0];
     }
 
     //neuron.outputPreAct = Math.round(netInput * 1e2) / 1e2;
-    netInput = this.activationFunction(netInput);
+    if (this.activationFunction) {
+        netInput = this.activationFunction(netInput);
+    }
     
     // this.output is just set for viewing, the return value is actually used:
     this.output = Math.round(netInput * 1e2) / 1e2;
+    if (Math.abs(this.output) > Math.abs(this.maxOutput)) {
+        this.maxOutput = Math.round(netInput * 1e2) / 1e2;
+    }
+    if (this.output > this.maxOutputPos) {
+        this.maxOutputPos = this.output;
+    }
+    if (this.output < this.maxOutputNeg) {
+        this.maxOutputNeg = this.output;
+    }
+    if (this.maxOutputPos - this.maxOutputNeg > this.maxOutputRng) {
+        this.maxOutputRng = this.maxOutputPos - this.maxOutputNeg;
+    } 
+    this.avgOutput += this.output;
+    this.avgOutput = Math.round(this.avgOutput * 1e2) / 1e2;
+    
     return netInput;
 };

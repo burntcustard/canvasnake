@@ -160,7 +160,7 @@ export default function newGame(game) {
             game.ai.popIndexA = game.ai.popIndexA || 1;
             game.ai.popIndexB = game.ai.popIndexB || 1;
             //game.ai.popIndexB++;
-            if (game.ai.popIndexB > population.roundsPerChromo) {
+            if (game.ai.popIndexB > population.roundsPerOrganism) {
                 game.ai.popIndexA++;
                 game.ai.popIndexB = 1;
             }
@@ -169,32 +169,32 @@ export default function newGame(game) {
                 game.ai.popIndexA = 1;
                 game.ai.popIndexB = 1;
             }
-            let randomIndex = population.chromosomes.randomIndex();
-            let chromoA = population.chromosomes[game.ai.popIndexA-1];
-            let chromoB = (population.settings.roundsPerChromo ===         
+            let randomIndex = population.organisms.randomIndex();
+            let organismA = population.organisms[game.ai.popIndexA-1];
+            let organismB = (population.settings.roundsPerOrganism ===         
                            population.settings.populationSize) ?     
-                population.chromosomes[game.ai.popIndexB-1] :
-                population.chromosomes.random();
+                population.organisms[game.ai.popIndexB-1] :
+                population.organisms.random();
             // Remove any starting location bias by maybe swapping spawns:
-            if (coinToss()) [chromoA, chromoB] = [chromoB, chromoA];
+            if (coinToss()) [organismA, organismB] = [organismB, organismA];
             /*
             let g = game.ai.population.genCounter,
                 a = game.ai.popIndexA,
                 b = game.ai.popIndexB;
             console.log("Gen: " + g + " | A: " + a + " | B: " + b);
             //*/
-            chromoA.roundsPlayed++;
-            chromoB.roundsPlayed++;
+            organismA.roundsPlayed++;
+            organismB.roundsPlayed++;
             game.snakes = [
                 new Snake({
-                    color: chromoA.genome.color,
-                    ai: {chromosome: chromoA},
+                    color: organismA.genome.color,
+                    ai: {neuralNet: organismA},
                     speed: 0,
                     coords: [{x: 10, y: 7}, {x: 10, y: 6}, {x: 10, y: 5}]
                 }),
                 new Snake({
-                    color: chromoB.genome.color,
-                    ai: {chromosome: chromoB},
+                    color: organismB.genome.color,
+                    ai: {neuralNet: organismB},
                     speed: 0,
                     coords: [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
                 })

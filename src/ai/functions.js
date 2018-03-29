@@ -4,7 +4,7 @@ import { unAbs } from '../lib.js';
 
 
 function sigmoid(t) {
-    return 1/(1+Math.exp(-t));
+    return 1 / (1 + Math.exp(-t));
 }
 
 function tanh(t) {
@@ -16,35 +16,55 @@ export function ReLU(t) {
 }
 
 export function softsign(t) {
-    return t / (1+Math.abs(t));
+    return t / (1 + Math.abs(t));
 }
 
-export function clamp(t) {
-    if (t < -1) {
-        return -1;
-    } else
-    if (t > 1) {
-        return 1;
+export function doubleSoftsign(t) {
+    return 2 * (t / (1 + Math.abs(t)));
+}
+
+/**
+ * Returns a number clamped between min and max values (inclusive).
+ * @param   {number} number   [[Description]]
+ * @param   {number} min = -1 [[Description]]
+ * @param   {number} max = +1 [[Description]]
+ * @returns {number} [[Description]]
+ */
+export function clamp(number, min = -1, max = 1) {
+    if (number < min) {
+        return min;
     }
-    return t;
+    if (number > max) {
+        return max;
+    }
+    return number;
 }
 
 
-// Random number between 0 and 1 that's likely to be near 0:
-// TODO: Graphs and/or codepen demo with graph.
-// TODO: Performance tests cause this is funky and maybe slow.
+
+/**
+ * Returns a floating-point, pseudo-random number in
+ * the range [0,1], that is likely to be around 0.
+ * 
+ * TODO: Link to graphs on CodePen or somewhere.
+ * TODO: Performance tests cause this is funky and maybe slow.
+ * 
+ * @param   {number} pullTo0 = 3 Integer that determines how likely the
+ *                               generated number is to be near 0.
+ * @returns {number} Pseudo-random weighted number.
+ */
 export function randomWeightedLow(pullTo0 = 3) {
     return Math.min(...[...Array(pullTo0)].map(() => Math.random()));
 }
 
 /**
- * Generate a random weight between -1 and 1, favouring around 0.
- *  - TODO: Actually make it favour 0?...
- * @returns {number} [[Description]]
+ * Returns a floating-point, pseudo-random number,
+ * in the range [-1,1], that is likely to be around 0.
+ * 
+ * @returns {number} Pseudo-random number that is intended
+ *                   to be used as a neuron weight value.
  */
 export function randomWeight() {
-    //return sigmoid(Math.random()*2-1) * 2 - 1;
-    //return Math.random() * 2 - 1;
     return unAbs(randomWeightedLow());
 }
 

@@ -9,17 +9,6 @@ export function generationDetails(pop) {
         best: pop.fitness.best - pop.oldFitness.best
     };
 
-    /*
-    //console.info("=================================");
-    console.log("Generation: " + this.genCounter);
-    console.log("  Fitness:");
-    console.log("    Total: " + this.fitness.total + diffStr(fitnessDiff.total));
-    console.log("    Average: " + this.fitness.avg + diffStr(fitnessDiff.avg));
-    console.log("    Best: " + this.fitness.best + diffStr(fitnessDiff.best));
-    console.log("    Worst: " + this.fitness.worst + diffStr(fitnessDiff.worst));
-    console.log("  Run time: " + Math.round(this.runTime / 1000) + "s");
-    console.log("=================================");
-    */
     let genStr = "Gen" + (pop.genCounter.toString()).padStart(3, '0');
     let timeStr = (Math.round(pop.runTime / 1000) + "s").padStart(4);
     let avgStr = (pop.fitness.avg.toString()).padStart(6) + diffStr(fitnessDiff.avg).padEnd(8);
@@ -47,4 +36,48 @@ function diffStr(number) {
     } else {
         return " ("  + number + ")";
     }
+}
+
+
+
+/**
+ * Prints a population of Neural Nets fitnesses, and their mutation values
+ * to console, with square brackets around those that aren't being killed off.
+ * @param {object} population   The population of NNs.
+ * @param {number} amountToKill The number of NNs that are about to be culled.
+ */
+export function fitnessList(population, amountToKill) {
+    let str = "Gen" + (population.genCounter) + " fitnesses: [ ";
+    let organisms = population.organisms;
+    for (let i = 0; i < organisms.length; i++) {
+        str += organisms[i].genome.fitness;
+        if (organisms[i].genome.mutated) {
+            str += "m";
+            str = str + organisms[i].genome.mutated;
+        }
+        str += " ";
+        if (i === organisms.length - amountToKill) str += "] ";
+    }
+    console.log(str);
+}
+
+
+
+/**
+ * Prints an entire populations list of Neural Nets
+ * fitnesses, and their mutation values to console.
+ * @param {object} population The population of NNs.
+ */
+export function survivorList(population) {
+    let survivorStr = "Gen" + (population.genCounter) + " survivors fitness: ";
+    let organisms = population.organisms;
+    for (let i = 0; i < organisms.length; i++) {
+        survivorStr += organisms[i].genome.fitness;
+        if (organisms[i].genome.mutated) {
+            survivorStr += "m";
+            survivorStr = survivorStr + organisms[i].genome.mutated;
+        }
+        survivorStr += " ";
+    }
+    console.log(survivorStr);
 }

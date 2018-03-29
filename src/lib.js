@@ -44,12 +44,10 @@ Float32Array.prototype.first = function() {
 
 /**
  * Return all the values of an array added together.
- * @returns {number} [[Description]]
+ * @returns {number, string} [[Description]]
  */
-Array.prototype.sum = function () {
-  return this.reduce(function(previous, current) {
-      return previous + current;
-  }, 0);
+Array.prototype.sum = function() {
+  return this.reduce((previous, current) => previous + current);
 };
 
 /**
@@ -57,7 +55,29 @@ Array.prototype.sum = function () {
  * @returns {number} [[Description]]
  */
 Array.prototype.avg = function () {
-  return this.sum()/this.length;
+  return this.sum() / this.length;
+};
+
+/**
+ * Shuffles the elements of an array in place and returns the array.
+ * 
+ * Uses a modern adaptation of the Fisher-Yates shuffle algorithm.
+ */
+Array.prototype.shuffle = function() {
+    var i, j;
+    for (i = this.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        [this[i], this[j]] = [this[j], this[i]];
+    }
+    return this;
+};
+
+
+Array.prototype.maxIndex = function() {
+    return this.indexOf(Math.max(...this));
+};
+Array.prototype.minIndex = function() {
+    return this.indexOf(Math.min(...this));
 };
 
 
@@ -68,11 +88,7 @@ Array.prototype.avg = function () {
 * @returns {Boolean} Yay or nay.
 */
 export function coinToss() {
-    if (Math.floor((Math.random() * 2))) {
-        return true;
-    } else {
-        return false;
-    }
+    return (Math.floor(Math.random() * 2)) ? true : false;
 }
 
 /**

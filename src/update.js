@@ -68,7 +68,7 @@ export function update(game) {
         }
         // Update AI fitnesses. TODO: Reword.
         game.snakes.forEach(snake => {
-            if (snake.ai && snake.ai.chromosome) {
+            if (snake.ai && snake.ai.neuralNet) {
                 snake.updateFitness(game.results);
             }
         });
@@ -76,7 +76,7 @@ export function update(game) {
             // A fought B-1, (because before this gets printed B gets incremented).
             //console.log("A: " + game.ai.popIndexA + " | B: " + game.ai.popIndexB);
             if (game.ai.popIndexA === game.ai.population.size &&
-                game.ai.popIndexB > game.ai.population.roundsPerChromo) {
+                game.ai.popIndexB > game.ai.population.roundsPerOrganism) {
                 game.ai.population.refresh();
             }
         }

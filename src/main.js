@@ -119,11 +119,15 @@ window.canvasnake = function() {
             if (game.state.gameOver && game.settings.autoRepeat === true) {
                 newGame(game);
             } else {
-                game.updateInterval = 0;
-                game.snakes.forEach(snake => {
-                    game.updateInterval += snake.speed;
-                });
-                game.updateInterval /= game.snakes.length;
+                if (game.state.paused) {
+                    game.updateInterval = 100;
+                } else {
+                    game.updateInterval = 0;
+                    game.snakes.forEach(snake => {
+                        game.updateInterval += snake.speed;
+                    });
+                    game.updateInterval /= game.snakes.length;
+                }
                 clearInterval(game.gameLoop);
                 game.gameLoop = setInterval(game.mainLoopFunc, game.updateInterval);
             }

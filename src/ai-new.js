@@ -1,5 +1,6 @@
 
 import { Snake } from './snake.js';
+import { softsign } from './ai/functions.js';
 
 
 function cardinalToRelative(snakeDirection, input) {
@@ -78,10 +79,6 @@ function relativeToCardinal(snakeDirection, direction) {
 
 }
 
-function softsign(t) {
-    return t / (1+Math.abs(t));
-}
-
 // Convert from 0,1 to -1,1 (or similar.. both equal dist from 0 or it'll break).
 function toRange(input, min, max) {
     return (input * max * 2) - min;
@@ -143,39 +140,24 @@ function getInputs(snake, game) {
 
 export function chooseDirection(snake, game) {
 
-    snake.ai.chromosome.update(getInputs(snake, game));
+    snake.ai.neuralNet.update(getInputs(snake, game));
 
-    var outputs = snake.ai.chromosome.outputs;
+    var outputs = snake.ai.neuralNet.outputs;
     var newDirection = snake.newDirection = null;
-    var genome = snake.ai.chromosome.genome;
+    var genome = snake.ai.neuralNet.genome;
     if (snake.turnCounter === undefined) { snake.turnCounter = 0; }
 
-    // Don't care about outputs that are below or equal to 0.5 threshold:
-    for (let i = 0; i < outputs.length; i++) {
-        if (outputs[i] <= 0) outputs[i] = NaN;
-    }
-    
-    // Get the index of the highest of the Forward/Right/Backward/Left outputs
-    // output is -1 if all of the whole outputs TypedArray is NaN
+    // Get the index of the highest of the Forward/Right/Left outputs
+    // output is 0 if all the outputs are 0 (or identical).
     var output = outputs.indexOf(Math.max(...outputs));
     switch (output) {
-        case 0:
-            newDirection = 'R';
-            snake.turnCounter++;
-        break;
-        case 1:
-            newDirection = 'L';
-            snake.turnCounter--;
-        break;
+        case 0: newDirection = 'F'; break;
+        case 1: newDirection = 'R'; break;
+        case 2: newDirection = 'L'; break;
     }
-    //console.log(snake.turnCounter);
-    //genome.fitness -= Math.floor(Math.abs(snake.turnCounter)/4);
+    
     snake.newDirection = relativeToCardinal(snake.direction, newDirection);
-/*
-    if (newDirection) {
-        console.info("new direction picked: " + newDirection);
-    }
-*/
+
     // Reward for just staying alive:
     genome.fitness++;
 
@@ -184,18 +166,11 @@ export function chooseDirection(snake, game) {
 
     if (snake.foodDist && snake.foodDist.oldTotal) {
 
-        /*/ Reward for being near-ish food:
-        if (snake.foodDist.total < 5) {
-            genome.fitness += 5 - snake.foodDist.total;
-        }//*/
-
         // Reward for going towards/away from food:
         if (snake.foodDist.total < snake.foodDist.oldTotal) {
-            genome.fitness += 5;
-            //console.log("Rewarding snake for going towards food");
+            genome.fitness += 3;
         } else {
-            genome.fitness -= 5;
-            //console.log("Punishing snake for going away from food");
+            genome.fitness -= 3;
         }
     }
 
@@ -204,18 +179,16 @@ export function chooseDirection(snake, game) {
 
 Snake.prototype.updateFitness = function(results) {
 
-    var genome = this.ai.chromosome.genome;
+    var genome = this.ai.neuralNet.genome;
 
     // Reward for eating any foods:
-    genome.fitness += this.score * 100;
+    genome.fitness += this.score * 20;
     
-    //console.log("Turn counter on death: " + this.turnCounter);
-
     // Penalty for dying because of getting dizzy:
     //if (this.ai.dizzy) genome.fitness -= 10;
 
     // Reward for winning (and getting at least 1 food):
-    //if (this === results.winner) genome.fitness += 100;
+    if (this === results.winner) genome.fitness += 50;
     
     // Penalty for losing. Important because some snakes might play more so
     // have a higher chance of winning randomly, so need the penalty chance too

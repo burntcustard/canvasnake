@@ -35,8 +35,8 @@ export function Snake({
     
     // Give the snake AI properties if an 'ai' parameter object passed in:
     if (ai) {
-        if (ai.chromosome) {
-            let {suicideOnWin = false} = ai;
+        if (ai.neuralNet) {
+            let {suicideOnWin = true} = ai;
             Object.assign(ai, {suicideOnWin});
             //ai.chromosome.roundsPlayed++;
         } else {
@@ -191,7 +191,7 @@ Snake.prototype.update = function(game) {
     // Pick direction for AI controlled snakes
     if ((this.ai && this.ai.dizzy === false) &&
         !(this.ai.alone && this.winning && this.ai.suicideOnWin)) {
-        if (this.ai.chromosome) {
+        if (this.ai.neuralNet) {
             newAI.chooseDirection(this, game);
         } else {
             oldAI.chooseDirection(this, game);
