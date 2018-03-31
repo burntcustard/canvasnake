@@ -18,6 +18,17 @@ export function Population({
 
     // Reference to the ai-nn settings global variable:
     this.settings = settings;
+    
+    // Number of organisms within the population
+    this.size = populationSize;
+    
+    this.cullRatio = settings.cullRatio;
+    
+    // Number of organisms that get culled between rounds:
+    this.cullNum = Math.round(this.size * this.cullRatio);
+    
+    // Number of organisms that should survive the cull:
+    this.survivorNum = this.size - this.cullNum;
 
     // A bunch of neural nets:
     this.organisms = [];
@@ -25,9 +36,6 @@ export function Population({
     // Copies of the best genomes in the population:
     this.bestGenomeCurrent = {fitness: 0};
     this.bestGenomeEver = {fitness: 0};
-
-    // Nusmber of organisms within the population
-    this.size = populationSize;
     
     this.roundsPerOrganism = settings.roundsPerOrganism;
 
@@ -94,7 +102,8 @@ Population.prototype.updateFitness = function() {
 
 
 /**
- * Kill off x amount [0,1] of the worst performing snakes.
+ * Kill off x amount [0,1] of the worst performing snakes,
+ * and set the 'old' property of remaining snakes to true.
  * 
  * Also used as as the function to optionally print details
  * of the previous generations fitness values to console.
@@ -103,21 +112,12 @@ Population.prototype.updateFitness = function() {
  */
 Population.prototype.cull = function(ratio = settings.cullRatio) {
     
-    var amountToKill = Math.trunc(this.organisms.length * ratio);
-    
-    print.fitnessList(this, amountToKill);
-    
-    this.organisms.splice(this.organisms.length - amountToKill);
-    
-    //print.survivorList(this);
-    
-    // Reset the fitness of the remaining organisms:
+    print.fitnessList(this, this.cullNum);
+    this.organisms.splice(this.survivorNum);
     this.organisms.forEach(organism => {
-        organism.genome.fitness = settings.baseFitness;
-        organism.roundsPlayed = 0;
         organism.old = true;
     });
-
+    //print.survivorList(this);
 };
 
 
@@ -126,43 +126,51 @@ Population.prototype.cull = function(ratio = settings.cullRatio) {
  * Gets the population back up to it's initial size by breeding the
  * remaining organisms. Uses a type of fitness proportionate selection.
  */
-Population.prototype.breed = function() {
+Population.prototype.breed = function(parentsPerChild = 2) {
     
-    var newOrganisms = [];
+    // Exponent to increase the chance of a
+    // higher fitness parent being selected:
+    var exp = 1;
     
-    // Exponent to greatly increase the chance of
-    // a higher fitness parent being selected
-    var exp = 2;
+    // The inverse of the sum of the fitness of all non-culled organisms:
+    let fitnessTotal = 1 / (this.organisms.reduce(
+        (acc, cur) => acc + Math.pow(cur.genome.fitness, exp), 0
+    ));
     
-    // Add all fitnesses
-    let fitnessTotal = this.organisms.reduce(
-        (previous, current) => previous + Math.pow(current.genome.fitness, exp),
-        0
-    );
-    
-    let fitnessTotalInv = 1 / fitnessTotal;
-    
-    var parents = [];
-    
-    for (let i = 0; i < this.size - this.organisms.length; i++) {
-        parents = [];
-        //let parentStr = "";
-        for (let j = 0; parents.length < 2; j++) {
-            if (j === this.organisms.length) j = 0;  // Overflow j
+    // For every gap in the population caused by culling:
+    for (let i = 0; i < this.cullNum; i++) {
+        
+        // Select some parents:
+        let parents = [];
+        for (let j = 0; parents.length < parentsPerChild; j++) {
+            // Overflow j to stay only selecting survivors:
+            if (j === this.survivorNum) j = 0;
             let fitness = Math.pow(this.organisms[j].genome.fitness, exp);
-            if (Math.random() < fitnessTotalInv * fitness) {
+            if (Math.random() < fitnessTotal * fitness) {
                 parents.push(this.organisms[j]);
-                //parentStr += ("p" + parents.length + " i" + j + ", ");
             }
         }
-        newOrganisms.push(crossover(parents));
-        //console.log(parentStr);
+        
+        // Crossover parents and add child to the population:
+        this.organisms.push(crossover(parents));
     }
-    
-    newOrganisms.forEach(newOrganism => {
-        this.organisms.push(newOrganism);
-    });
 
+};
+
+
+
+/**
+ * Resets the per-round values of snakes that are 'old',
+ * i.e. have ramained from the previous generation.
+ */
+Population.prototype.resetOrganisms = function() {
+    // Reset the fitness of the remaining organisms:
+    this.organisms.forEach(organism => {
+        if (organism.old) {
+            organism.genome.fitness = settings.baseFitness;
+            organism.roundsPlayed = 0; 
+        }
+    });
 };
 
 
@@ -217,7 +225,8 @@ Population.prototype.refresh = function() {
     // Print a line to the console with info about the last generation:
     print.generationDetails(this);
 
-    // Kill some organisms then breed replacements:
+    // Kill some organisms, breed replacements, reset values of old ones:
     this.cull();
     this.breed();
+    this.resetOrganisms();
 };

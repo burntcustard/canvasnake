@@ -10,7 +10,7 @@ export function generationDetails(pop) {
     };
 
     let genStr = "Gen" + (pop.genCounter.toString()).padStart(3, '0');
-    let timeStr = (Math.round(pop.runTime / 1000) + "s").padStart(4);
+    let timeStr = (pop.runTime + "s").padStart(4);
     let avgStr = (pop.fitness.avg.toString()).padStart(6) + diffStr(fitnessDiff.avg).padEnd(8);
     let bestStr = (pop.fitness.best.toString()).padStart(6) + diffStr(fitnessDiff.best).padEnd(8);
     let worstStr = (pop.fitness.worst.toString()).padStart(6) + diffStr(fitnessDiff.worst).padEnd(8);
@@ -56,7 +56,7 @@ export function fitnessList(population, amountToKill) {
             str = str + organisms[i].genome.mutated;
         }
         str += " ";
-        if (i === organisms.length - amountToKill) str += "] ";
+        if (i === population.survivorNum - 1) str += "] ";
     }
     console.log(str);
 }
@@ -66,7 +66,7 @@ export function fitnessList(population, amountToKill) {
 /**
  * Prints an entire populations list of Neural Nets
  * fitnesses, and their mutation values to console.
- * @param {object} population The population of NNs.
+ * @param {object} population The post-cull population of NNs.
  */
 export function survivorList(population) {
     let survivorStr = "Gen" + (population.genCounter) + " survivors fitness: ";

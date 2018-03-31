@@ -155,4 +155,4 @@ Genome.prototype.save = function(population) {
     delete genome.baseWeights;
     
     return genome;
-}
+};

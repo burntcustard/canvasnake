@@ -2,6 +2,7 @@
 import { settings } from './settings.js';
 import { Neuron } from './neuron.js';
 import { Genome } from './genome.js';
+import * as convert from '../convert.js';
 import * as func from './functions.js';
 import * as lib from '../lib.js';
 
@@ -154,4 +155,23 @@ NeuralNet.prototype.update = function(inputs) {
         });
         onInputLayer = false;
     });
+};
+
+
+
+NeuralNet.prototype.encode = function() {
+    
+    var neuralNetStr = "";
+    
+    this.layers.forEach(layer => {
+        layer.forEach(neuron => {
+            neuron.weights.forEach(weight => {
+                neuralNetStr += convert.weightToBase64(weight);
+            });
+            if (neuron !== layer.last()) neuralNetStr += '/';
+        });
+        if (layer !== this.layers.last()) neuralNetStr += '|';
+    });
+    
+    return neuralNetStr;
 };

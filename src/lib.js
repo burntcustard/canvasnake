@@ -38,6 +38,10 @@ Float32Array.prototype.randomIndex = function() {
     return Math.trunc(Math.random() * this.length);
 };
 
+Array.prototype.last = function() {
+    return this[this.length - 1];
+};
+
 Float32Array.prototype.first = function() {
     return this.slice(0, 1);
 };
@@ -185,10 +189,19 @@ export function isOdd(arg) {
 
 /* === COLORS === */
 
+/**
+ * Returns a random hex color string. E.g. "#f9da05".
+ * @returns {string} Hex color string
+ */
 export function randomColor() {
     return '#'+(Math.random() * 0xFFFFFF << 0).toString(16);
 }
 
+/**
+ * Returns a hex color string which is an average of multiple input colors.
+ * @param   {Array}  colors Array of hex color strings.
+ * @returns {string} Hex color string.
+ */
 export function combineColors(colors) {
     var output = "#";
     for(var i = 1; i < 6; i += 2) {

@@ -19,7 +19,7 @@ export const settings = Object.freeze({
     numHiddenLayers: 1,
     numOutputs: 3,
     numNeuronsPerLayer: 10,
-    baseFitness: 100,      // Base fitness of each chromosome.
-    cullRatio: 0.6,        // % of chromosomes to kill at end of round.
+    baseFitness: 100,      // Base fitness of each organism.
+    cullRatio: 0.66,       // % of chromosomes to kill at end of round.
     mutationRate: 0.3,     // % of children to mutate
 });
