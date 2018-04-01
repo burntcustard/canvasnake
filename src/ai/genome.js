@@ -1,5 +1,5 @@
 
-import { randomColor } from '../lib.js';
+import { randomColor } from '../lib/color.js';
 import { settings } from './settings.js';
 import { randomWeight, randomWeightedLow, clamp } from './functions.js';
 
@@ -137,9 +137,15 @@ Genome.prototype.mutate = function(
 
 
 
+/**
+ * Returns a copy of the genome with some bits removed, some
+ * added, making it suitable for analysing and/or recreating.
+ * @param   {object} population The population the genome belongs to.
+ * @returns {object} Modified copy of the genome.
+ */
 Genome.prototype.save = function(population) {
     
-    // Save as a copy of the genome:
+    // A copy of the genome:
     let genome = JSON.parse(JSON.stringify(this));
     
     // Add the generation counter:

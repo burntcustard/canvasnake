@@ -13,7 +13,7 @@
 
 export const settings = Object.freeze({
     debug: true,           // Set to false to remove debugging properties.
-    populationSize: 40,    // Probably has to be even.
+    populationSize: 30,    // Probably has to be even.
     roundsPerOrganism: 10, // Number of rounds an organism MUST participate in.
     numInputs: 5,          // 
     numHiddenLayers: 1,

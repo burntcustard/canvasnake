@@ -3,6 +3,7 @@ import { Snake } from './snake.js';
 import { softsign } from './ai/functions.js';
 
 
+
 function cardinalToRelative(snakeDirection, input) {
 
     if (input.x !== undefined && input.y !== undefined) {
@@ -79,10 +80,7 @@ function relativeToCardinal(snakeDirection, direction) {
 
 }
 
-// Convert from 0,1 to -1,1 (or similar.. both equal dist from 0 or it'll break).
-function toRange(input, min, max) {
-    return (input * max * 2) - min;
-}
+
 
 function getInputs(snake, game) {
 
@@ -161,12 +159,8 @@ export function chooseDirection(snake, game) {
     // Reward for just staying alive:
     genome.fitness++;
 
-    // Reward for going in a straight line (and being alive still):
-    //if (!newDirection) genome.fitness++;
-
+    // Reward for going towards/away from food:
     if (snake.foodDist && snake.foodDist.oldTotal) {
-
-        // Reward for going towards/away from food:
         if (snake.foodDist.total < snake.foodDist.oldTotal) {
             genome.fitness += 3;
         } else {
@@ -177,21 +171,15 @@ export function chooseDirection(snake, game) {
 }
 
 
+
 Snake.prototype.updateFitness = function(results) {
 
     var genome = this.ai.neuralNet.genome;
 
     // Reward for eating any foods:
     genome.fitness += this.score * 20;
-    
-    // Penalty for dying because of getting dizzy:
-    //if (this.ai.dizzy) genome.fitness -= 10;
 
     // Reward for winning (and getting at least 1 food):
     if (this === results.winner) genome.fitness += 50;
-    
-    // Penalty for losing. Important because some snakes might play more so
-    // have a higher chance of winning randomly, so need the penalty chance too
-    //if (this !== results.winner) genome.fitness -= 50;
 
 };

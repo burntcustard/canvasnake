@@ -1,5 +1,5 @@
 
-import { coinToss } from './lib.js';
+import { coinToss } from './lib/misc.js';
 import * as ai from './ai.js';
 import * as oldAI from './ai-old.js';
 import * as newAI from './ai-new.js';

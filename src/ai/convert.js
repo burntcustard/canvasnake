@@ -60,7 +60,7 @@ function floatFractionToBinary(number) {
 export function weightToBase64(weight) {
     
     if (weight < -1 || weight > 1) {
-        throw new RangeError("Weight must be in the range [-1.1]");
+        throw new RangeError("Weight must be in the range [-1,1]");
     }
     
     var binaryString = floatFractionToBinary(weight);
@@ -77,69 +77,44 @@ export function weightToBase64(weight) {
         base64Str = digitStr[digitStrIndex] + base64Str;
     }
     
-    // ±
-    if (weight < 0) {
-        return '-' + base64Str;
-    } else {
-        return '+' + base64Str;
-    }
-    
-}
-
-
-
-function bin2dec(number) {
-    return number.split('').reverse().reduce(function(x, y, i) {
-        return (y === '1') ? x + Math.pow(2, i) : x;
-    }, 0);
+    let sign = weight < 0 ? '-' : '+';
+    return sign + base64Str;
 }
 
 
 
 export function base64ToWeight(base64) {
     
-    var base64Length = 5;
-    var weightStr = "";
-    var weight = new Float32Array(1);
+    var numLength = 5,  // Length of the numbers part of the base64 string.
+        weightStr = "",
+        weightInt = 0,
+        weight = new Float32Array(1);
     
-    var weightInt = 0;
-    
-    for (let i = 0; i < base64Length-1; i++) {
-        //weightStr += digitStr.indexOf(base64[i]).toString(2).padStart(6,'0');
-        //weightInt += digitStr.indexOf(base64[base64Length-1-i]) * Math.pow(64, i);
-        let base64Char = digitStr.indexOf(base64[base64Length-1-i]);
-        //console.log("base64Char: " + base64Char);
-        let base64Value = base64Char * Math.pow(64, i);
-        //console.log("base64Value: " + base64Value);
+    for (let i = 0; i < numLength - 1; i++) {
+        let base64Index = digitStr.indexOf(base64[numLength - 1 - i]);
+        let base64Value = base64Index * Math.pow(64, i);
         weightInt += base64Value;
     }
-    
-    //console.log("weightInt: " + weightInt);
     
     // Pad the left to get digits in the right places:
     weightStr = weightInt.toString(10).padStart(floatPrecision, '0');
     
-    //console.log("weightInt after padding: " + weightStr);
-    
-    if (base64[0] === '-') {
-        weightStr = "-0." + weightStr;
-    } else {
-        weightStr = "+0." + weightStr;
-    }
-    
-    weight[0] = weightStr;  // Automagic String -> Float32 parsing.
+    let sign = base64[0] === '-' ? "-0." : "+0.";
+    weight[0] = sign + weightStr;  // Automagic String -> Float32 parsing.
     return weight[0];
 }
 
 
 
-export function testConversions() {
-    
+/**
+ * Test to check if conversions to/from base64 work.
+ * TODO: Disable depending on the AI debug setting?
+ */
+window.testConversions = function() {
     var testWeight = Math.random() * 2 - 1;
     console.log("Test weight: " + testWeight);
     var base64 = weightToBase64(testWeight);
     console.log("  Converted to base64: " + base64);
     var float32 = base64ToWeight(base64);
     console.log("  Converted back to float32: " + float32);
-    
-}
+};

@@ -6,6 +6,14 @@
 
 
 
+function bin2dec(number) {
+    return number.split('').reverse().reduce(function(x, y, i) {
+        return (y === '1') ? x + Math.pow(2, i) : x;
+    }, 0);
+}
+
+
+
 /**
  * Create a child from the genomes of one or more parents.
  * @param {Array} parents [[Description]]

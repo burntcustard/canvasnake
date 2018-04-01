@@ -2,9 +2,9 @@
 import { settings } from './settings.js';
 import { Neuron } from './neuron.js';
 import { Genome } from './genome.js';
-import * as convert from '../convert.js';
+import * as convert from './convert.js';
 import * as func from './functions.js';
-import * as lib from '../lib.js';
+import '../lib/array.js';
 
 
 
@@ -52,8 +52,6 @@ export function NeuralNet({
     
     var currentWeight = {i: 0};
     
-    //console.log(currentWeight);
-    
     var weightBoundLower = 0;
     var weightBoundUpper = numInputs;
     this.layers.push(new Layer(
@@ -84,8 +82,6 @@ export function NeuralNet({
         ));
     }
     
-    //console.log(currentWeight);
-    
     this.layers.push(new Layer(
         "Output",
         this.layers[this.layers.length-1].outputs,
@@ -96,8 +92,6 @@ export function NeuralNet({
         numOutputs * (neuronsPerLayer + 1),
         func.ReLU
     ));
-    
-    //console.log(currentWeight);
     
     this.outputs = this.layers[this.layers.length-1].outputs;
     
@@ -111,19 +105,19 @@ export function NeuralNet({
         }
     }
     
-    //*// Warn if there are any left over weights:
-    if (currentWeight.i < genome.weights.length) {
-        console.warn("Unused genome weights:");
-        for (let i = currentWeight.i; i < genome.weights.length; i++) {
-            console.log(genome.weights[i]);
+    if (settings.debug) {
+        // Warn if there are any left over weights:
+        if (currentWeight.i < genome.weights.length) {
+            console.warn("Unused genome weights:");
+            for (let i = currentWeight.i; i < genome.weights.length; i++) {
+                console.log(genome.weights[i]);
+            }
         }
-    }
-    //*/
-    
-    //*// Warn if there weren't enough weights:
-    if (currentWeight > genome.weights.length) {
-        let numNeeded = currentWeight - genome.weights.length;
-        console.warn("Needed " + numNeeded + " more genome weights");
+        // Warn if there weren't enough weights:
+        if (currentWeight > genome.weights.length) {
+            let numNeeded = currentWeight - genome.weights.length;
+            console.warn("Needed " + numNeeded + " more genome weights");
+        }
     }
 
 }
@@ -149,7 +143,7 @@ NeuralNet.prototype.update = function(inputs) {
                 ));
             } else {
                 // In the following layers, each neuron receives
-                // every output from previous layer:
+                // every output from the previous layer:
                 layer.outputs[i] = neuron.activate(layer.inputs);
             }
         });

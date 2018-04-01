@@ -1,7 +1,7 @@
 
 import { NeuralNet } from './neuralNet.js';
 import { Genome } from './genome.js';
-import { combineColors } from '../lib.js';
+import { combineColors } from '../lib/color.js';
 
 
 

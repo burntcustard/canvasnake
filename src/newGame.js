@@ -2,7 +2,7 @@
 import { spawnFood } from './food.js';
 import { Snake } from './snake.js';
 import { Population } from './ai/population.js';
-import { isEven, isOdd, coinToss } from './lib.js';
+import { coinToss } from './lib/misc.js';
 
 
 

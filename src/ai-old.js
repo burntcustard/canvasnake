@@ -1,6 +1,6 @@
 
 import { check as checkCollision } from './collision.js';
-import { coinToss } from './lib.js';
+import { coinToss } from './lib/misc.js';
 
 
 
