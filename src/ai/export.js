@@ -1,4 +1,7 @@
 
+import { encodeGenome } from './genomeStr.js';
+
+
 /**
  * If the game has a collection of data about a population
  * then download it as a Comma Separated Values file.
@@ -27,14 +30,22 @@ export function update(population) {
     if (!population.csv) {
         population.csv = [
             Object.keys(population.settings),
-            Object.values(population.settings),
+            // Add population setting values with commas replaced with hyphens:
+            Object.values(population.settings).map(
+                value => value.toString().replace(/,/g, '.')
+            ),
             [],
-            //["Best genome recent:", decode(population.bestGenomeCurrent)],
-            //["Best genome ever:"  , decode(population.bestGenomeEver)],
-            //[],
             ["generation", "average", "best", "worst", "total", "runTime"]
         ];
+        population.csv[0].length += 3;
+        population.csv[1].length += 3;
+        population.csv[0][population.csv[0].length-2] = "Best genome from last-round:";
+        population.csv[1][population.csv[1].length-2] = "Best genome from population:";
     }
+    var bestGenomeRecent = encodeGenome(population.bestGenomeCurrent).replace(/#/, 'c:');
+    var bestGenomeEver = encodeGenome(population.bestGenomeEver).replace(/#/, 'c:');
+    population.csv[0][population.csv[0].length-1] = bestGenomeRecent;
+    population.csv[1][population.csv[1].length-1] = bestGenomeEver;
     population.csv.push([
         population.genCounter,
         population.fitness.avg,

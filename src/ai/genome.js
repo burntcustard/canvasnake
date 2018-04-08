@@ -72,13 +72,13 @@ Genome.prototype.mutate = function(
     //amountToMutate = settings.mutationAmount,
     //numberToMutate = settings.mutationNumber,
     //tendancy = settings.mutationTendancy,
-    newWeightRate = 1,  //0.001,
-    maxWeightRate = 0,  //0.001,
-    minWeightRate = 0,  //0.001,
-    posWeightRate = 0, //0.05,
-    negWeightRate = 0,  //0.05
-    flipWeightRate = 0, //0.001,
-    zeroWeightRate = 0, //0.001,
+    newWeightRate = 1,
+    maxWeightRate = 0,
+    minWeightRate = 0,
+    posWeightRate = 0,
+    negWeightRate = 0,
+    flipWeightRate = 0,
+    zeroWeightRate = 0,
     randWeightRate = 0
 ) {
 

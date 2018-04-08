@@ -7,16 +7,16 @@ import { isName } from '../lib/misc.js';
 
 /**
  * Returns a concise string containing a genomes important properties.
- * 
+ *
  * Includes the following strings:
  *   - Name (optional), alphanumerical, spaces and _ only e.g. "My_genome 1"
  *   - Color, starting with '#' e.g. "#cc6600"
  *   - Fitness, starting with 'f:' e.g. "f:1500"
- *   - Topology, comma separated values e.g. "5,10,3"
+ *   - Topology, period separated values e.g. "5.10.3"
  *   - Weights, base64-likes starting with '+' or '-' e.g. "+45gD-FSh4+F8et..."
- * 
+ *
  * Properties are separated by '|'. No spaces. Only topology can have commas.
- * 
+ *
  * @param   {object} genome A Genome.
  * @returns {string} Encoded genome properties.
  */
@@ -26,7 +26,7 @@ export function encodeGenome(genome) {
         optionalNameStr,
         genome.color + '|' +
         'f:' + genome.fitness + '|' +
-        genome.topology.toString() + '|' +
+        genome.topology.toString().replace(/,/g, '.') + '|' +
         genome.weights.reduce((acc, cur) => {
             return acc + weightToBase64(cur);
         }, "")
@@ -46,20 +46,22 @@ export function decodeGenome(encodedGenome) {
         console.warn("Invalid genome string. Returning random genome.");
         return new Genome();
     }
-    
+
     var genome = {colorStr: "", topologyStr: "", weightsStr: "", weights: []};
-    
+
     // Remove unwanted chars (add others within square brackets if required),
     // and split into array of color, topology, weights etc. properties:
     encodedGenome = encodedGenome.replace(/["]+/g, '').split('|');
-    
+
     // Figure out which part (which array element) is which property:
     encodedGenome.forEach(property => { switch(true) {
-        case isName(property)      : genome.name        = property; break;
-        case property[0] === '#'   : genome.colorStr    = property; break;
-        case property.includes(','): genome.topologyStr = property; break;
-        case property[0] === '+'   :
-        case property[0] === '-'   : genome.weightsStr  = property; break;
+        case isName(property)       : genome.name        = property; break;
+        case property.includes('c:'):
+        case property[0] === '#'    : property = property.replace('c:', '#');
+                                      genome.colorStr    = property; break;
+        case property.includes('.') : genome.topologyStr = property; break;
+        case property[0] === '+'    :
+        case property[0] === '-'    : genome.weightsStr  = property; break;
     }});
 
     // Convert weights string to array of floats:
@@ -80,7 +82,7 @@ export function decodeGenome(encodedGenome) {
     return new Genome({
         name: genome.name,
         color: genome.colorStr,
-        topology: genome.topologyStr.split(',').map(Number),
+        topology: genome.topologyStr.split('.').map(Number),
         weights: new Float32Array(genome.weights),
     });
 }
