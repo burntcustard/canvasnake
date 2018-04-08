@@ -1,17 +1,31 @@
 
 import { Genome } from './genome.js';
 import { weightToBase64, base64ToWeight } from './base64.js';
+import { isName } from '../lib/misc.js';
 
 
 
 /**
- * [[Description]]
- * @param   {object}   genome [[Description]]
- * @returns {[[Type]]} [[Description]]
+ * Returns a concise string containing a genomes important properties.
+ * 
+ * Includes the following strings:
+ *   - Name (optional), alphanumerical, spaces and _ only e.g. "My_genome 1"
+ *   - Color, starting with '#' e.g. "#cc6600"
+ *   - Fitness, starting with 'f:' e.g. "f:1500"
+ *   - Topology, comma separated values e.g. "5,10,3"
+ *   - Weights, base64-likes starting with '+' or '-' e.g. "+45gD-FSh4+F8et..."
+ * 
+ * Properties are separated by '|'. No spaces. Only topology can have commas.
+ * 
+ * @param   {object} genome A Genome.
+ * @returns {string} Encoded genome properties.
  */
 export function encodeGenome(genome) {
+    var optionalNameStr = genome.name ? genome.name + '|' : '';
     return (
+        optionalNameStr,
         genome.color + '|' +
+        'f:' + genome.fitness + '|' +
         genome.topology.toString() + '|' +
         genome.weights.reduce((acc, cur) => {
             return acc + weightToBase64(cur);
@@ -19,58 +33,56 @@ export function encodeGenome(genome) {
     );
 }
 
-export function decodeGenome(genomeStr) {
 
-    if (!genomeStr) {
-        console.warn("Invalid genome string, creating random genome.");
+
+/**
+ * Decodes an encoded genome information string and returns a new Genome.
+ * @param   {string} encodedGenome The genome string to decode.
+ * @returns {object} A new Genome.
+ */
+export function decodeGenome(encodedGenome) {
+
+    if (!encodedGenome) {
+        console.warn("Invalid genome string. Returning random genome.");
         return new Genome();
     }
+    
+    var genome = {colorStr: "", topologyStr: "", weightsStr: "", weights: []};
+    
+    // Remove unwanted chars (add others within square brackets if required),
+    // and split into array of color, topology, weights etc. properties:
+    encodedGenome = encodedGenome.replace(/["]+/g, '').split('|');
+    
+    // Figure out which part (which array element) is which property:
+    encodedGenome.forEach(property => { switch(true) {
+        case isName(property)      : genome.name        = property; break;
+        case property[0] === '#'   : genome.colorStr    = property; break;
+        case property.includes(','): genome.topologyStr = property; break;
+        case property[0] === '+'   :
+        case property[0] === '-'   : genome.weightsStr  = property; break;
+    }});
 
-    var properties = ["color", "topology", "weights"],  // We don't actually use the last/weights one.
-        property = properties.values(),
-        currentStr = "",
-        genomeInfo = {
-            color: "",
-            topology: [],
-            weights: []
-        };
-
-    // Remove unwanted chars (add others within square brackets if required):
-    genomeStr = genomeStr.replace(/["]+/g, '');
-
-    genomeStr.split('').forEach(char => {
-        switch (char) {
-            case '+':
-            case '-':
-                if (currentStr.length) {
-                    genomeInfo.weights.push(base64ToWeight(currentStr));
-                }
-                currentStr = char;
-            break;
-            case '|':
-                switch (property.next().value) {
-                    case "color":
-                        genomeInfo.color = currentStr;
-                    break;
-                    case "topology":
-                        genomeInfo.topology = currentStr.split(',').map(Number);
-                    break;
-                }
-                currentStr = "";
-            break;
-            default:
-                currentStr += char;
+    // Convert weights string to array of floats:
+    var current = "";
+    genome.weightsStr.split('').forEach(char => {
+        if (char === '+' || char === '-') {
+            if (current.length) {
+                genome.weights.push(base64ToWeight(current));
+            }
+            current = char;
+        } else {
+            current += char;
         }
     });
-
     // Add the last "trailing" (no end character) weight:
-    genomeInfo.weights.push(base64ToWeight(currentStr));
+    genome.weights.push(base64ToWeight(current));
 
-    return new Genome(
-        genomeInfo.topology,
-        new Float32Array(genomeInfo.weights),
-        genomeInfo.color
-    );
+    return new Genome({
+        name: genome.name,
+        color: genome.colorStr,
+        topology: genome.topologyStr.split(',').map(Number),
+        weights: new Float32Array(genome.weights),
+    });
 }
 
 /**

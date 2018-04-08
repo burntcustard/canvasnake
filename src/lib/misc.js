@@ -1,5 +1,20 @@
 
 /**
+ * Returns true if a string is a valid name, i.e. only contains alphanumerical
+ * characters, spaces, or underscores. Otherwise returns false.
+ * 
+ * Specifically: [0..9], [a..z], [A..Z], ' ', '_'.
+ * 
+ * @param   {string} string Input string to test.
+ * @returns {boolean}
+ */
+export function isName(string) {
+    return /^[\w\s]+$/.test(string);
+}
+
+
+
+/**
 * @returns {Boolean} Yay or nay.
 */
 export function coinToss() {

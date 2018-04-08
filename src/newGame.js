@@ -207,7 +207,7 @@ export default function newGame(game) {
         break;
 
         case "old ai vs new ai":
-            // TODO: Proper user input etc.
+            // TODO: Fancy user input etc.
             game.ai = game.ai || {};
             game.ai.neuralNet = game.ai.neuralNet ||
                                 new NeuralNet({genome: decodeGenome(
@@ -218,12 +218,14 @@ export default function newGame(game) {
                     name: "Old AI",
                     ai: {},
                     color: "black",
+                    speed: 20,
                     coords: [{x: 10, y: 7}, {x: 10, y: 6}, {x: 10, y: 5}]
                 }),
                 new Snake({
-                    name: "NeuralNet AI",
+                    name: game.ai.neuralNet.genome.name || "NeuralNet AI",
                     ai: {neuralNet: game.ai.neuralNet},
                     color: game.ai.neuralNet.genome.color,
+                    speed: 20,
                     coords: [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
                 })
             ];

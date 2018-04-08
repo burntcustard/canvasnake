@@ -14,9 +14,6 @@ import { NeuralNet } from './neuralNet.js';
 // The length of the fractional part to use for the floats:
 const floatPrecision = 7;
 
-const layerSplitChar  = '|';
-const neuronSplitChar = '/';
-
 const digitStr =
 //  0       8       16      24      32      40      48      56     63
 //  v       v       v       v       v       v       v       v      v
@@ -49,7 +46,7 @@ function floatFractionToBinary(number) {
     number = parseInt(number).toString(2);
     // "11101111101011110011110"
 
-    // Make sure the padding/character number is correct:
+    // Make sure the padding/character count is correct:
     number = number.padStart(24,'0');
     // "011101111101011110011110"
 
@@ -124,99 +121,3 @@ window.testBase64Conversions = function() {
     var float32 = base64ToWeight(base64);
     console.log("  Converted back to float32: " + float32);
 };
-
-
-
-/**
- * Encodes relevant properties of a NeuralNet to a mostly-base64-like
- * string, allowing it to be shared, imported, and recreated easily.
- * @returns {string}
- */
-export function encode(neuralNet) {
-
-    var neuralNetStr = "";
-
-    neuralNet.layers.forEach(layer => {
-        layer.forEach(neuron => {
-            neuron.weights.forEach(weight => {
-                neuralNetStr += weightToBase64(weight);
-            });
-            //if (neuron !== layer.last()) neuralNetStr += '/';
-        });
-        //if (layer !== neuralNet.layers.last()) neuralNetStr += '|';
-    });
-
-    return neuralNetStr;
-}
-
-
-
-export function neuralNetFromInfo(neuralNetInfo) {
-    let weights = new Float32Array(neuralNetInfo.weights);
-    return new NeuralNet({
-        numInputs: neuralNetInfo.numInputs,
-        numHiddenLayers: neuralNetInfo.numHiddenLayers,
-        neuronsPerLayer: neuralNetInfo.neuronsPerLayer,
-        numOutputs: neuralNetInfo.numOutputs,
-        weights: weights
-    });
-}
-
-
-
-/*
-export function decode(neuralNetStr) {
-
-    var neuralNetInfo = {
-        numInputs: 0,
-        numHiddenLayers: 0,
-        neuronsPerLayer: 0,
-        numOutputs: 0,
-        weights: []
-    };
-
-    let base64 = "";
-    let neuronsThisLayer = 0;
-
-    neuralNetStr.split('').forEach(char => {
-        //console.log(char);
-        switch (char) {
-            case '+':
-            case '-':
-                if (base64.length) {
-                    neuralNetInfo.weights.push(base64ToWeight(base64));
-                }
-                base64 = char;
-            break;
-            case neuronSplitChar:
-                neuralNetInfo.weights.push(base64ToWeight(base64));
-                base64 = "";
-                neuronsThisLayer++;
-            break;
-            case layerSplitChar:
-                neuralNetInfo.weights.push(base64ToWeight(base64));
-                base64 = "";
-                neuronsThisLayer++;
-                // First layer is the input layer
-                if (neuralNetInfo.numInputs === 0) {
-                    neuralNetInfo.numInputs = neuronsThisLayer;
-                } else {
-                    // Hidden layers
-                    if (neuralNetInfo.neuronsPerLayer === 0) {
-                        neuralNetInfo.neuronsPerLayer = neuronsThisLayer;
-                        neuralNetInfo.numHiddenLayers++;
-                    }
-                }
-                neuronsThisLayer = 0;
-            break;
-            default:
-                base64 += char;
-        }
-    });
-    neuralNetInfo.weights.push(base64ToWeight(base64));
-    // Output layer:
-    neuralNetInfo.numOutputs = neuronsThisLayer+1;
-
-    return neuralNetInfo;
-}
-*/

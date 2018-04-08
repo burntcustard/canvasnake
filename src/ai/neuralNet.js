@@ -58,10 +58,10 @@ export function NeuralNet({
         throw new Error("No topology specified for NeuralNet.");
     }
 
-    this.genome = genome = genome || new Genome(
-        this.topology,
-        weights
-    );
+    this.genome = genome = genome || new Genome({
+        topology: this.topology,
+        weights: weights
+    });
 
     this.population = population;
     this.roundsPlayed = 0;

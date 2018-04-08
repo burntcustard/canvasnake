@@ -66,13 +66,14 @@ export function update(game) {
                 game.results.draw = true;
             }
         }
-        // Update AI fitnesses. TODO: Reword.
-        game.snakes.forEach(snake => {
-            if (snake.ai && snake.ai.neuralNet) {
-                snake.updateFitness(game.results);
-            }
-        });
-        if (game.ai) {
+        // Update NeuralNet AIs, and their population:
+        if (game.ai && game.ai.population) {
+            // Update the fitnesses on end-of-round (e.g. points for winning):
+            game.snakes.forEach(snake => {
+                if (snake.ai && snake.ai.neuralNet) {
+                    snake.updateFitness(game.results);
+                }
+            });
             // A fought B-1, (because before this gets printed B gets incremented).
             //console.log("A: " + game.ai.popIndexA + " | B: " + game.ai.popIndexB);
             if (game.ai.popIndexA === game.ai.population.size &&

@@ -12,9 +12,10 @@ import { encodeGenome } from './genomeStr.js';
  * @param {[[Type]]} topology [[Description]]
  * @param {[[Type]]} weights  [[Description]]
  */
-export function Genome(topology, weights, color) {
+export function Genome({topology, weights, color, name} = {}) {
 
     this.fitness = settings.baseFitness;
+    if (name) this.name = name;
     this.color = color || randomColor();
     this.topology = topology || settings.topology;
     if (weights) {

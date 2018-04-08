@@ -34,10 +34,10 @@ export function crossover(parents) {
         childWeights[i] = parent.genome.weights[i];
     }
 
-    var genome = new Genome(
-        parents[0].genome.topology,
-        childWeights
-    );
+    var genome = new Genome({
+        topology: parents[0].genome.topology,
+        weights: childWeights
+    });
 
     //var child = new NeuralNet(
     //    {genome: genome, population: parents[0].population}
