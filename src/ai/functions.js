@@ -45,10 +45,10 @@ export function clamp(number, min = -1, max = 1) {
 /**
  * Returns a floating-point, pseudo-random number in
  * the range [0,1], that is likely to be around 0.
- * 
+ *
  * TODO: Link to graphs on CodePen or somewhere.
  * TODO: Performance tests cause this is funky and maybe slow.
- * 
+ *
  * @param   {number} pullTo0 = 3 Integer that determines how likely the
  *                               generated number is to be near 0.
  * @returns {number} Pseudo-random weighted number.
@@ -60,7 +60,7 @@ export function randomWeightedLow(pullTo0 = 3) {
 /**
  * Returns a floating-point, pseudo-random number,
  * in the range [-1,1], that is likely to be around 0.
- * 
+ *
  * @returns {number} Pseudo-random number that is intended
  *                   to be used as a neuron weight value.
  */

@@ -1,7 +1,7 @@
 
 
 export function generationDetails(pop) {
-    
+
     let fitnessDiff = {
         total: pop.fitness.total - pop.oldFitness.total,
         avg: pop.fitness.avg - pop.oldFitness.avg,
@@ -15,11 +15,11 @@ export function generationDetails(pop) {
     let bestStr = (pop.fitness.best.toString()).padStart(6) + diffStr(fitnessDiff.best).padEnd(8);
     let worstStr = (pop.fitness.worst.toString()).padStart(6) + diffStr(fitnessDiff.worst).padEnd(8);
     //console.log("Gen: " + this.genCounter + timeStr + " Fitness:");
-    if (pop.genCounter === 0) {
+    if (pop.genCounter === 1) {
         console.log("       | Time |   Average    |     Best     |    Worst");
     }
     console.log(genStr+" | "+timeStr+" |"+ avgStr+"|"+bestStr+"|"+worstStr);
-    
+
 }
 
 

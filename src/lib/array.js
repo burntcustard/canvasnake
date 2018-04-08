@@ -16,7 +16,7 @@
  * myArray = [x, y, z];
  * myArray.swap(0, 2);
  * myArray === [z, y, x];
- * 
+ *
  * @param   {int} a Index of element A.
  * @param   {int} b Index of element B.
  * @returns {array} The array with A and B swapped.
@@ -36,10 +36,6 @@ Array.prototype.random = function() {
 
 Array.prototype.randomIndex = function() {
     return Math.trunc(Math.random() * this.length);
-};
-
-Array.prototype.first = function() {
-    return this[0];
 };
 
 Array.prototype.last = function() {
@@ -64,7 +60,7 @@ Array.prototype.avg = function () {
 
 /**
  * Shuffles the elements of an array in place and returns the array.
- * 
+ *
  * Uses a modern adaptation of the Fisher-Yates shuffle algorithm.
  */
 Array.prototype.shuffle = function() {

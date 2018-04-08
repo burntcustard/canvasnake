@@ -13,9 +13,9 @@ import { combineColors } from '../lib/color.js';
  * @returns {object} Child Neural Network.
  */
 export function crossover(parents) {
-    
+
     var childWeights = new Float32Array(parents[0].genome.weights.length);
-    
+
     /*
     // Pick random NEURONS from parents & use the weights for the child genome
     var numNeurons = parents[0].neurons.length;
@@ -33,19 +33,16 @@ export function crossover(parents) {
         let parent = parents[Math.floor(Math.random() * parents.length)];
         childWeights[i] = parent.genome.weights[i];
     }
-    
+
     var genome = new Genome(
-        parents[0].numInputs,
-        parents[0].numHiddenLayers,
-        parents[0].neuronsPerLayer,
-        parents[0].numOutputs,
+        parents[0].genome.topology,
         childWeights
     );
-    
+
     //var child = new NeuralNet(
     //    {genome: genome, population: parents[0].population}
     //);
-    
+
     if (Math.random() < parents[0].population.mutationRate) {
         genome.mutate();
     } else {
@@ -56,8 +53,8 @@ export function crossover(parents) {
         });
         genome.color = combineColors(parentColors);
     }
-    
+
     return new NeuralNet({genome: genome, population: parents[0].population});
     //return child;
-    
+
 }

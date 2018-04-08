@@ -13,12 +13,9 @@
 
 export const settings = Object.freeze({
     debug: true,           // Set to false to remove debugging properties.
-    populationSize: 30,    // Probably has to be even.
+    populationSize: 30,    // Number of organisms. Probably has to be even.
     roundsPerOrganism: 10, // Number of rounds an organism MUST participate in.
-    numInputs: 5,          // 
-    numHiddenLayers: 1,
-    numOutputs: 3,
-    numNeuronsPerLayer: 10,
+    topology: [5, 10, 3],  // Number of layers and neurons per layer.
     baseFitness: 100,      // Base fitness of each organism.
     cullRatio: 0.66,       // % of chromosomes to kill at end of round.
     mutationRate: 0.3,     // % of children to mutate

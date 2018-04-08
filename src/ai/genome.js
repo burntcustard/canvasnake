@@ -1,39 +1,43 @@
 
 import { randomColor } from '../lib/color.js';
+import { unAbs } from '../lib/misc.js';
 import { settings } from './settings.js';
 import { randomWeight, randomWeightedLow, clamp } from './functions.js';
+import { encodeGenome } from './genomeStr.js';
 
 
 
 /**
  * [[Description]]
- * @param {number} inputs          Number of input neurons.
- * @param {number} hiddenLayers    Number of middle/hidden layers.
- * @param {number} neuronsPerLayer Number of neurons per hidden layer.
- * @param {number} outputs         Number of output neurons.
+ * @param {[[Type]]} topology [[Description]]
+ * @param {[[Type]]} weights  [[Description]]
  */
-export function Genome(inputs, hiddenLayers, neuronsPerLayer, outputs, weights) {
+export function Genome(topology, weights, color) {
 
     this.fitness = settings.baseFitness;
-    this.color = randomColor();
+    this.color = color || randomColor();
+    this.topology = topology || settings.topology;
     if (weights) {
         this.weights = weights;
     } else {
     // Weights haven't been specified so randomly generate some:
-        let numOfWeights = inputs;  // One weight for each input neuron bias.
-        numOfWeights += (inputs + 1) * neuronsPerLayer;
-        numOfWeights += ((neuronsPerLayer + 1) * neuronsPerLayer) * (hiddenLayers - 1);
-        numOfWeights += (neuronsPerLayer + 1) * outputs;
+        let numOfWeights = this.topology[0]; // A weight for each input neuron bias.
+        for (let i = 1; i < this.topology.length; i++) {
+            numOfWeights += this.topology[i] * (this.topology[i-1] + 1);
+        }
         // Make array of x length that's all initialized to 0 (super speedy):
         this.weights = new Float32Array(numOfWeights);
         for (let i = 0; i < this.weights.length; i++) {
             this.weights[i] = randomWeight();
         }
     }
+
     // Keep a record of the original "base" weights that the genome started
     // with. After a lot of mutating, this.weights should be quite different!
     this.baseWeights = this.weights.slice();
 }
+
+
 
 Genome.prototype.getMutatedWeights = function() {
     var mutatedWeights = [];
@@ -64,62 +68,69 @@ Genome.prototype.getMutatedWeights = function() {
  *                          E.g. 0.1 means on average, 1 in every 10 will mutate.
  */
 Genome.prototype.mutate = function(
-    amountToMutate = settings.mutationAmount,
-    numberToMutate = settings.mutationNumber,
-    tendancy = settings.mutationTendancy,
-    flipWeightRate = 0, //0.001,     
+    //amountToMutate = settings.mutationAmount,
+    //numberToMutate = settings.mutationNumber,
+    //tendancy = settings.mutationTendancy,
     newWeightRate = 1,  //0.001,
     maxWeightRate = 0,  //0.001,
     minWeightRate = 0,  //0.001,
-    zeroWeightRate = 0, //0.001,
     posWeightRate = 0, //0.05,
-    negWeightRate = 0  //0.05
+    negWeightRate = 0,  //0.05
+    flipWeightRate = 0, //0.001,
+    zeroWeightRate = 0, //0.001,
+    randWeightRate = 0
 ) {
-    
+
+    var numberToMutate;
+
     var threshold = new Float64Array(7);
-    for (let i = 0; i < threshold.length; i++) threshold[i] += flipWeightRate;
-    for (let i = 1; i < threshold.length; i++) threshold[i] += newWeightRate;
-    for (let i = 2; i < threshold.length; i++) threshold[i] += maxWeightRate;
-    for (let i = 3; i < threshold.length; i++) threshold[i] += minWeightRate;
-    for (let i = 4; i < threshold.length; i++) threshold[i] += zeroWeightRate;
-    for (let i = 5; i < threshold.length; i++) threshold[i] += posWeightRate;
-    for (let i = 6; i < threshold.length; i++) threshold[i] += negWeightRate;
-    
+    for (let i = 0; i < threshold.length; i++) threshold[i] += newWeightRate;
+    for (let i = 1; i < threshold.length; i++) threshold[i] += maxWeightRate;
+    for (let i = 2; i < threshold.length; i++) threshold[i] += minWeightRate;
+    for (let i = 3; i < threshold.length; i++) threshold[i] += posWeightRate;
+    for (let i = 4; i < threshold.length; i++) threshold[i] += negWeightRate;
+    for (let i = 5; i < threshold.length; i++) threshold[i] += flipWeightRate;
+    for (let i = 6; i < threshold.length; i++) threshold[i] += zeroWeightRate;
+    for (let i = 7; i < threshold.length; i++) threshold[i] += randWeightRate;
+
     /*
     let weightsDebug = [];
     for (let i = 0; i < this.weights.length; i++) {
         weightsDebug.push((i.toString()).padStart(3) + "| " + this.weights[i]);
     }
     //*/
-    
+
     //this.weights.forEach((objectRef, i, weights) => {
-    this.mutated = numberToMutate = 1 + Math.floor(randomWeightedLow() * 9);
+    this.mutated = numberToMutate = 1 + Math.floor(randomWeightedLow() * 8);
     let i = this.weights.randomIndex();
     for (let j = 0; j < numberToMutate; j++) {
         if (++i === this.weights.length) i = 0;  // Increment/overflow.
         let chance = Math.random();
         if (chance < threshold[0]) {
-            this.weights[i] = -this.weights[i];
-        } else        
-        if (chance < threshold[1]) {
             this.weights[i] = randomWeight();
         } else
-        if (chance < threshold[2]) {
+        if (chance < threshold[1]) {
             this.weights[i] = +1.0;
         } else
-        if (chance < threshold[3]) {
+        if (chance < threshold[2]) {
             this.weights[i] = -1.0;
         } else
-        if (chance < threshold[4]) {
-            this.weights[i] = 0.0;
-        } else
-        if (chance < threshold[5]) {
+        if (chance < threshold[3]) {
             this.weights[i] += randomWeightedLow(9);
             this.weights[i] = clamp(this.weights[i]);
         } else
-        if (chance < threshold[6]) {
+        if (chance < threshold[4]) {
             this.weights[i] -= randomWeightedLow(9);
             this.weights[i] = clamp(this.weights[i]);
+        } else
+        if (chance < threshold[5]) {
+            this.weights[i] = -this.weights[i];
+        } else
+        if (chance < threshold[6]) {
+            this.weights[i] = 0.0;
+        } else
+        if (chance < threshold[7]) {
+            this.weights[i] = unAbs(Math.random());
         }
     //});
     }
@@ -129,7 +140,7 @@ Genome.prototype.mutate = function(
         console.log(weightsDebug[i]);
     }
     //*/
-    
+
     //this.mutated = true;
     this.color = randomColor();
 
@@ -144,21 +155,24 @@ Genome.prototype.mutate = function(
  * @returns {object} Modified copy of the genome.
  */
 Genome.prototype.save = function(population) {
-    
+
     // A copy of the genome:
     let genome = JSON.parse(JSON.stringify(this));
-    
+
+    // Convert weights back into a Float32Array because JSON breaks it:
+    genome.weights = new Float32Array(this.weights);
+
     // Add the generation counter:
-    genome.created = "gen" + this.genCounter;
-    
-    // Save neural network topology:
-    genome.topology = [];
-    population.organisms[0].layers.forEach(layer => {
-        genome.topology.push(layer.length);
-    });
-    
-    // Don't need the original starting weights of the saved genome
+    if (population) genome.created = "gen" + population.genCounter;
+
+    // Remove unnecessary properties:
     delete genome.baseWeights;
-    
+
     return genome;
+};
+
+
+
+Genome.prototype.encode = function() {
+    return encodeGenome(this);
 };

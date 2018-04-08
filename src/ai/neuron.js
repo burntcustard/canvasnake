@@ -16,10 +16,10 @@ export function Neuron(weights, genomeLocation, activFunc = func.softsign) {
 }
 
 Neuron.prototype.activate = function(inputs) {
-    
+
     let netInput = 0;
     this.inputs.set(inputs);
-    
+
     if (this.inputs.length > 1) {
         for (let i = 1; i < this.weights.length; i++) {
             netInput += this.weights[i] * this.inputs[i-1];
@@ -34,7 +34,7 @@ Neuron.prototype.activate = function(inputs) {
     if (this.activationFunction) {
         netInput = this.activationFunction(netInput);
     }
-    
+
     // this.output is just set for viewing, the return value is actually used:
     this.output = Math.round(netInput * 1e2) / 1e2;
     if (Math.abs(this.output) > Math.abs(this.maxOutput)) {
@@ -48,9 +48,9 @@ Neuron.prototype.activate = function(inputs) {
     }
     if (this.maxOutputPos - this.maxOutputNeg > this.maxOutputRng) {
         this.maxOutputRng = this.maxOutputPos - this.maxOutputNeg;
-    } 
+    }
     this.avgOutput += this.output;
     this.avgOutput = Math.round(this.avgOutput * 1e2) / 1e2;
-    
+
     return netInput;
 };

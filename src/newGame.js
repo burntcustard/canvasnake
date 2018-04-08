@@ -2,7 +2,10 @@
 import { spawnFood } from './food.js';
 import { Snake } from './snake.js';
 import { Population } from './ai/population.js';
+import { NeuralNet } from './ai/neuralNet.js';
 import { coinToss } from './lib/misc.js';
+import * as base64 from './ai/base64.js';
+import { decodeGenome } from './ai/genomeStr.js';
 
 
 
@@ -26,7 +29,7 @@ export default function newGame(game) {
     switch (game.settings.gameMode.toLowerCase()) {
 
         /* === GAMEMODE EXAMPLE === //
-        case "name of game mode" :
+        case "name of game mode":
             game.snakes = [
                 new Snake({
                     name:       // Name of the snake (shown on end screen).
@@ -47,7 +50,7 @@ export default function newGame(game) {
         break;
         // === END OF EXAMPLE === */
 
-        case "single player" :
+        case "single player":
             game.snakes = [
                 new Snake({
                     name: "Player 1",
@@ -58,7 +61,7 @@ export default function newGame(game) {
             ];
         break;
 
-        case "single player vs ai" :
+        case "single player vs ai":
             game.snakes = [
                 new Snake({
                     name: "Player 1",
@@ -75,7 +78,7 @@ export default function newGame(game) {
             ];
         break;
 
-        case "two player" :
+        case "two player":
             game.snakes = [
                 new Snake({
                     name: "Player 1",
@@ -92,7 +95,7 @@ export default function newGame(game) {
             ];
         break;
 
-        case "three player" :
+        case "three player":
             game.snakes = [
                 new Snake({
                     name: "Player 1",
@@ -115,7 +118,7 @@ export default function newGame(game) {
             ];
         break;
 
-        case "ai vs ai" :
+        case "ai vs ai":
             game.snakes = [
                 new Snake({
                     name: "Regular AI",
@@ -134,7 +137,7 @@ export default function newGame(game) {
             ];
         break;
 
-        case "crazy ai" :
+        case "crazy ai":
         // Crazy lots of snakes
             for (var s = 1; s <= 200; s++) {
                 game.snakes.push(new Snake({
@@ -151,7 +154,7 @@ export default function newGame(game) {
             game.scoresNeverNeedDrawing = true;
         break;
 
-        case "neuroevolution ai" :
+        case "neuroevolution ai":
             game.settings.autoRepeat = true;
             //game.settings.skipRender = true;
             game.ai = game.ai || {};
@@ -171,8 +174,8 @@ export default function newGame(game) {
             }
             let randomIndex = population.organisms.randomIndex();
             let organismA = population.organisms[game.ai.popIndexA-1];
-            let organismB = (population.settings.roundsPerOrganism ===         
-                           population.settings.populationSize) ?     
+            let organismB = (population.settings.roundsPerOrganism ===
+                           population.settings.populationSize) ?
                 population.organisms[game.ai.popIndexB-1] :
                 population.organisms.random();
             // Remove any starting location bias by maybe swapping spawns:
@@ -201,6 +204,30 @@ export default function newGame(game) {
             ];
             game.ai.popIndexB++;
             game.scoresNeverNeedDrawing = true;
+        break;
+
+        case "old ai vs new ai":
+            // TODO: Proper user input etc.
+            game.ai = game.ai || {};
+            game.ai.neuralNet = game.ai.neuralNet ||
+                                new NeuralNet({genome: decodeGenome(
+                                    prompt("Input encoded Genome string:")
+                                )});
+            game.snakes = [
+                new Snake({
+                    name: "Old AI",
+                    ai: {},
+                    color: "black",
+                    coords: [{x: 10, y: 7}, {x: 10, y: 6}, {x: 10, y: 5}]
+                }),
+                new Snake({
+                    name: "NeuralNet AI",
+                    ai: {neuralNet: game.ai.neuralNet},
+                    color: game.ai.neuralNet.genome.color,
+                    coords: [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
+                })
+            ];
+
         break;
 
         default: console.error(

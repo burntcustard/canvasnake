@@ -25,14 +25,14 @@ export function crossoverOld(parents) {
     var genomeLength = parents[0].genome.weights.length;
     var childWeights = new Float32Array(genomeLength);
     var crossoverPoints = new Uint8Array(2 + Math.ceil(Math.random() * 3));
-    
+
     // [0] is the start, [1] is the end. [2...] are middle points
     crossoverPoints[1] = genomeLength-1;
     for (let i = 2; i < crossoverPoints.length; i++) {
         crossoverPoints[i] = Math.ceil(Math.random() * genomeLength -1);
     }
     crossoverPoints.sort((a, b) => a - b);
-    
+
     // Start w/random parent
     let parentCounter = Math.floor(Math.random() * parents.length);
     for (let i = 0; i < crossoverPoints.length; i++) {
@@ -63,7 +63,7 @@ export function crossoverOld(parents) {
         population: parents[0].population
     });
     */
-    
+
     // Maybe mutate the child genome based off the population's mutation rate:
     if (Math.random() < parents[0].population.mutationRate) {
         //let oldWeights = genome.weights.slice();
@@ -106,21 +106,21 @@ export function crossoverOld(parents) {
 /**
  * Old way of choosing which snakes to crossover.
  * Used the best snake in every pair resulting in  very similar offspring.
- * 
+ *
  * Gets the population back up to it's initial size by breeding
  * the best snake by other (randomly selected) remaining snakes.
  */
 Population.prototype.breed = function() {
-    
+
     var newChromosomes = [];
-    
+
     for (let i = 0; i < this.size - this.chromosomes.length; i++) {
         newChromosomes.push(crossover([
             this.chromosomes[0],
             this.chromosomes.random()
         ]));
     }
-    
+
     newChromosomes.forEach(newChromosome => {
         this.chromosomes.push(newChromosome);
     });
@@ -179,16 +179,16 @@ NeuralNet.prototype.mutateNeuron = function(layerIndex, neuronIndex) {
 */
 
 /**
- * Gets an array of 
+ * Gets an array of
  * @returns {[[Type]]} [[Description]]
  */
 NeuralNet.prototype.getNeuronPerfs = function() {
     var perfs = new Float32Array(this.neurons.length);
     for (let i = 0; i < this.layers[0].length; i++) {
         perfs[i] = NaN;
-    } 
+    }
     for (let i = this.layers[0].length; i < this.neurons.length; i++) {
-        perfs[i] = this.neurons[i].maxOutputRng;        
+        perfs[i] = this.neurons[i].maxOutputRng;
     }
     console.log(this.layers[1]);
     console.log(perfs);
@@ -196,34 +196,34 @@ NeuralNet.prototype.getNeuronPerfs = function() {
 };
 
 NeuralNet.prototype.giveNeuronsRanks = function() {
-    
+
     // Start with list of neurons, each with OutputRng
-    
+
     //console.log("Giving neurons ranks");
-    
+
     // Give each neuron a neuron index number
     for (let i = 0; i < this.neurons.length; i++) {
         this.neurons[i].nIndex = i;
     }
-    
+
     // Sort neurons by outputRng
     this.neurons.sort((a, b) => b.maxOutputRng - a.maxOutputRng);
-    
+
     // Give each neuron outputRng rank number
     for (let i = 0; i < this.neurons.length; i++) {
         this.neurons[i].rank = i;
     }
-    
+
     // Sort neurons by old neuron index number
     this.neurons.sort((a, b) => b.nIndex - a.nIndex);
-    
+
     // End with list of neurons, each one with a ranking from 0-neurons.length
     //for (let i = 0; i < this.neurons.length; i++) {
     //    console.log("Rank: " + this.neurons[i].rank + ": " + this.neurons[i].maxOutputRng);
     //}
-    
+
     //console.log("------");
-    
+
 };
 
 NeuralNet.prototype.mutateRandomWeight = function() {
@@ -248,7 +248,7 @@ NeuralNet.prototype.mutatePoorPerfNeuron = function() {
     var neuronIndex = neuronPerfs.indexOf(Math.min(...neuronPerfs));
     this.mutateNeuron(neuronIndex);
 };
-    
+
 /*
 NeuralNet.prototype.updateGenome = function(layerIndex, neuronIndex) {
     if (layerIndex !== undefined && neuronIndex !== undefined) {
@@ -277,23 +277,23 @@ NeuralNet.prototype.updateGenome = function(layerIndex, neuronIndex) {
 
 
 export function crossoverGoodNeuronsTest(parents) {
-    
+
     var genomeLength = parents[0].genome.weights.length;
     var numNeurons = parents[0].neurons.length;
     var childWeights = new Float32Array(genomeLength);
-    
+
     //var parentsNeuronPerfs = [];
-    
+
     console.log(parents);
-    
+
     for (let i = 0; i < parents.length; i++) {
         parents[i].giveNeuronsRanks();
     }
-    
+
     let p = Math.floor(Math.random() * parents.length);  // Parent index
     for (let i = 0; i < numNeurons; i++) {
         let neuron = parents[p].neurons[i];
-        
+
         // If the neuron isn't an input, and is a bad one (bottom half worst ish),
         // start looking at the next parent
         if (i > parents[0].inputs.length - 1 &&
@@ -301,15 +301,15 @@ export function crossoverGoodNeuronsTest(parents) {
             if ((p += 1) === parents.length) p = 0;  // Increment p
             console.log("Crossing over to p" + p + " cos of n w/ rank: " + neuron.rank + " for neuron " + i);
         }
-        
+
         // Go through each weight of the neuron and give it to the child
         let genomeLoc = neuron.genomeLocation;
         for (let j = genomeLoc; j < genomeLoc + neuron.weights.length; j++) {
             childWeights[j] = parents[p].genome.weights[j];
         }
-        
+
     }
-    
+
     var child = new NeuralNet({
         genome: new Genome(
             parents[0].numInputs,
@@ -320,7 +320,7 @@ export function crossoverGoodNeuronsTest(parents) {
         ),
         population: parents[0].population
     });
-    
+
     // Maybe mutate the child genome based off the population's mutation rate:
     if (Math.random() < parents[0].population.mutationRate) {
 
@@ -334,9 +334,9 @@ export function crossoverGoodNeuronsTest(parents) {
         });
         child.genome.color = combineColors(parentColors);
     }
-    
+
     return child;
-    
+
 }
 
 

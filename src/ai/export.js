@@ -1,6 +1,4 @@
 
-
-
 /**
  * If the game has a collection of data about a population
  * then download it as a Comma Separated Values file.
@@ -14,7 +12,7 @@ export function downloadCSV() {
     let csvContent = "data:text/csv;charset=utf-8,";
     window.game.ai.population.csv.forEach(row => {
         csvContent += row.join(",") + "\r\n";
-    }); 
+    });
     let encodedUri = encodeURI(csvContent);
     window.open(encodedUri);
 }
@@ -31,6 +29,9 @@ export function update(population) {
             Object.keys(population.settings),
             Object.values(population.settings),
             [],
+            //["Best genome recent:", decode(population.bestGenomeCurrent)],
+            //["Best genome ever:"  , decode(population.bestGenomeEver)],
+            //[],
             ["generation", "average", "best", "worst", "total", "runTime"]
         ];
     }
