@@ -52,10 +52,12 @@ export function fitnessList(population, amountToKill) {
     for (let i = 0; i < organisms.length; i++) {
         str += organisms[i].genome.fitness;
         if (organisms[i].genome.mutated) {
-            str += "m";
-            str = str + organisms[i].genome.mutated;
+            str += 'm' + organisms[i].genome.mutated;
         }
-        str += " ";
+        if (organisms[i].old) {
+            str += 'o';
+        }
+        str += ' ';
         if (i === population.survivorNum - 1) str += "] ";
     }
     console.log(str);
@@ -74,10 +76,9 @@ export function survivorList(population) {
     for (let i = 0; i < organisms.length; i++) {
         survivorStr += organisms[i].genome.fitness;
         if (organisms[i].genome.mutated) {
-            survivorStr += "m";
-            survivorStr = survivorStr + organisms[i].genome.mutated;
+            survivorStr += 'm' + organisms[i].genome.mutated;
         }
-        survivorStr += " ";
+        survivorStr += ' ';
     }
     console.log(survivorStr);
 }

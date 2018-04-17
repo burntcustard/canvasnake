@@ -21,18 +21,18 @@ export function Snake({
     coords,
     ai
 }) {
-    
+
     // Assign the optional parameters that have default values to the snake:
     Object.assign(this, {name, color, speed, direction});
 
     // If controls were specified then give them to the snake:
     if (controls) this.controls = controls;
-    
+
     // Coordinates for the snake MUST have been specified!
     this.coords = coords || console.error(
         "Coordinates must be specified for " + this.name
     );
-    
+
     // Give the snake AI properties if an 'ai' parameter object passed in:
     if (ai) {
         if (ai.neuralNet) {
@@ -47,7 +47,7 @@ export function Snake({
         }
         this.ai = ai;
     }
-    
+
     this.head = this.coords[0]; // Reference to the head coordinates for easy access.
     this.score = 0;
     this.dead = false;
@@ -56,7 +56,7 @@ export function Snake({
     this.centerDistance = {x: 0, y: 0, total: 0};
     this.movesSinceNommed = 0;
     this.winning = false;
-    
+
 }
 
 
@@ -94,9 +94,9 @@ Snake.prototype.updateDirection = function() {
 Snake.prototype.updateFoodDistance = function(foods) {
 
     var tmp = {};
-    
+
     this.foodDist.oldTotal = this.foodDist.total;
-    
+
     this.foodDist.x = 0;
     this.foodDist.y = 0;
     this.foodDist.total = 0;

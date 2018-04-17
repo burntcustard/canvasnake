@@ -19,7 +19,7 @@ export function updateHighScore(snake, highScores, gameMode, onlyAI) {
 export function update(game) {
 
     var snakeOrder = orderSnakes(game.snakes);
- 
+
     // Last round was the last update. The game is now over, and
     // we don't need to update again, so return (exit function):
     if (game.state.finalUpdate) {

@@ -43,8 +43,8 @@ export function crossover(parents) {
     //    {genome: genome, population: parents[0].population}
     //);
 
-    if (Math.random() < parents[0].population.mutationRate) {
-        genome.mutate();
+    if (genome.mutate()) {
+        // Genome was mutated
     } else {
         // Non-mutant organisms are the average color of their parents:
         let parentColors = [];

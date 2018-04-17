@@ -125,6 +125,7 @@ function handleInput(input, game) {
         case "6" : selectGameMode("Crazy AI");            break;
         case "7" : selectGameMode("Neuroevolution AI");   break;
         case "8" : selectGameMode("Old AI vs New AI");    break;
+        case "9" : selectGameMode("Neuroevolution AI 2"); break;
 
         // Other
         case "SPACE" : newGame(game); break;

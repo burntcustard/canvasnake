@@ -1,106 +1,7 @@
 
 import { Snake } from './snake.js';
 import { softsign } from './ai/functions.js';
-
-
-
-/**
- * Converts a cardinal direction to a relative direction.
- *
- * For example if a food object is on the right of the game board
- * and the snake is on the left, travelling towards the food, the
- * cardinal direction's x value is swapped with the y.
- *
- * For example if a an obstacle is to the East of a snake which is travelling
- * North, the cardinal directions East (E) property is converted to Right (R).
- *
- * @param {string} snakeDirection A snakes direction string.
- * @param {object} input          An object with either:
- *                                 - x and y properties
- *                                 - N,E,S,W properties
- * @returns {object} The input converted to a relative direction object.
- */
-function cardinalToRelative(snakeDirection, input) {
-
-    // Cardinal x, y coordinates -> Relative x, y coordinates
-    if (input.x !== undefined && input.y !== undefined) {
-        let {x, y} = input;
-        switch (snakeDirection) {
-            case 'N': return({x:  x, y: -y});
-            case 'E': return({x:  y, y:  x});
-            case 'S': return({x: -x, y:  y});
-            case 'W': return({x: -y, y: -x});
-        }
-    }
-
-    // Cardinal North, East, South, West -> Relative Front, Right, Back, Left
-    else if (input.N !== undefined) {
-        let {N, E, S, W} = input;
-        switch (snakeDirection) {
-            case 'N': return({F: N, R: E, B: S, L: W});
-            case 'E': return({F: E, R: S, B: W, L: N});
-            case 'S': return({F: S, R: W, B: N, L: E});
-            case 'W': return({F: W, R: N, B: E, L: S});
-        }
-    }
-
-}
-
-
-
-/**
- * Converts a relative direction string (F,R,B,L) to a cardinal direction
- * string (N,E,S,W), based off a snake's cardinal direction property.
- *
- * @param   {string} snakeDirection [[Description]]
- * @param   {string} direction      [[Description]]
- * @returns {string} [[Description]]
- */
-function relativeToCardinal(snakeDirection, direction) {
-
-    if (typeof(direction) === "string") {
-
-        switch (snakeDirection) {
-            case 'N':
-                switch (direction) {
-                    case 'F': return 'N';
-                    case 'R': return 'E';
-                    case 'B': return 'S';
-                    case 'L': return 'W';
-                }
-            break;
-            case 'E':
-                switch (direction) {
-                    case 'F': return 'E';
-                    case 'R': return 'S';
-                    case 'B': return 'W';
-                    case 'L': return 'N';
-                }
-            break;
-            case 'S':
-                switch (direction) {
-                    case 'F': return 'S';
-                    case 'R': return 'W';
-                    case 'B': return 'N';
-                    case 'L': return 'E';
-                }
-            break;
-            case 'W':
-                switch (direction) {
-                    case 'F': return 'W';
-                    case 'R': return 'N';
-                    case 'B': return 'E';
-                    case 'L': return 'S';
-                }
-            break;
-        }
-
-    }
-
-    // If nothing was converted:
-    throw new TypeError("Input was not a valid relative direction string.");
-
-}
+import { cardinalToRelative, relativeToCardinal } from './ai/relCard.js';
 
 
 
@@ -115,7 +16,22 @@ function getInputs(snake, game) {
     inputs.push(softsign(closestFood.x));
     inputs.push(softsign(closestFood.y));
 
-
+    /* // Separate L/R/F/B food inputs
+    if (closestFood.x > 0) {
+        inputs.push(0);
+        inputs.push(Math.min(1 / Math.abs(closestFood.x), 1));
+    } else {
+        inputs.push(Math.min(1 / Math.abs(closestFood.x), 1));
+        inputs.push(0);
+    }
+    if (closestFood.y > 0) {
+        inputs.push(0);
+        inputs.push(Math.min(1 / Math.abs(closestFood.y), 1));
+    } else {
+        inputs.push(Math.min(1 / Math.abs(closestFood.y), 1));
+        inputs.push(0);
+    }
+    */
     game.snakes.forEach(otherSnake => {
         if (snake !== otherSnake) {
             /*
@@ -146,9 +62,9 @@ function getInputs(snake, game) {
     */
 
     var blocked = cardinalToRelative(snake.direction, snake.blocked);
-    inputs.push((!!blocked.F | 0) * 2 - 1); // 8 - 4
-    inputs.push((!!blocked.R | 0) * 2 - 1);
-    inputs.push((!!blocked.L | 0) * 2 - 1);
+    inputs.push(!!blocked.F | 0); // 8 - 4
+    inputs.push(!!blocked.R | 0);
+    inputs.push(!!blocked.L | 0);
 
     return new Float32Array(inputs);
 

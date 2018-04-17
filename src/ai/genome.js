@@ -14,14 +14,14 @@ import { encodeGenome } from './genomeStr.js';
  */
 export function Genome({topology, weights, color, name} = {}) {
 
-    this.fitness = settings.baseFitness;
+    this.fitness = 0;
     if (name) this.name = name;
     this.color = color || randomColor();
     this.topology = topology || settings.topology;
     if (weights) {
         this.weights = weights;
     } else {
-    // Weights haven't been specified so randomly generate some:
+        // Weights haven't been specified so randomly generate some:
         let numOfWeights = this.topology[0]; // A weight for each input neuron bias.
         for (let i = 1; i < this.topology.length; i++) {
             numOfWeights += this.topology[i] * (this.topology[i-1] + 1);
@@ -29,7 +29,7 @@ export function Genome({topology, weights, color, name} = {}) {
         // Make array of x length that's all initialized to 0 (super speedy):
         this.weights = new Float32Array(numOfWeights);
         for (let i = 0; i < this.weights.length; i++) {
-            this.weights[i] = randomWeight();
+            this.weights[i] = settings.newWeight();
         }
     }
 
@@ -65,85 +65,69 @@ Genome.prototype.getMutatedWeights = function() {
  *                          old value is replaced with the new, 0.5
  *                          meaning that the replacement will be half
  *                          way in between the old and new values.
- * @param {number} tendancy How likely it is that a particular weight will be mutated.
+ * @param {number} tendancy How likely it is a particular weight will be mutated.
  *                          E.g. 0.1 means on average, 1 in every 10 will mutate.
  */
 Genome.prototype.mutate = function(
     //amountToMutate = settings.mutationAmount,
     //numberToMutate = settings.mutationNumber,
     //tendancy = settings.mutationTendancy,
-    newWeightRate = 1,
-    maxWeightRate = 0,
-    minWeightRate = 0,
-    posWeightRate = 0,
-    negWeightRate = 0,
-    flipWeightRate = 0,
-    zeroWeightRate = 0,
-    randWeightRate = 0
+    weightRates = {
+        new: 0.8,
+        max: 0,
+        min: 0,
+        pos: 0,
+        neg: 0,
+        flip: 0.2,
+        zero: 0,
+        rand: 0
+    },
+    weightFuncs = [
+        function() { return settings.newWeight(); },
+        function() { return +1; },
+        function() { return -1; },
+        function(weight) { return weight + randomWeightedLow(9); },
+        function(weight) { return weight - randomWeightedLow(9); },
+        function(weight) { return -weight; },
+        function() { return 0; },
+        function() { return unAbs(Math.random()); }
+    ]
 ) {
 
-    var numberToMutate;
+    // Need to do  [x x x - - x - -]
+    // rather than [- x - - x - x -]
+    // or          [- - - x x x - -] ?
 
-    var threshold = new Float64Array(7);
-    for (let i = 0; i < threshold.length; i++) threshold[i] += newWeightRate;
-    for (let i = 1; i < threshold.length; i++) threshold[i] += maxWeightRate;
-    for (let i = 2; i < threshold.length; i++) threshold[i] += minWeightRate;
-    for (let i = 3; i < threshold.length; i++) threshold[i] += posWeightRate;
-    for (let i = 4; i < threshold.length; i++) threshold[i] += negWeightRate;
-    for (let i = 5; i < threshold.length; i++) threshold[i] += flipWeightRate;
-    for (let i = 6; i < threshold.length; i++) threshold[i] += zeroWeightRate;
-    for (let i = 7; i < threshold.length; i++) threshold[i] += randWeightRate;
+    this.mutated = settings.mutationAmount();
 
-    /*
-    let weightsDebug = [];
-    for (let i = 0; i < this.weights.length; i++) {
-        weightsDebug.push((i.toString()).padStart(3) + "| " + this.weights[i]);
+    if (!this.mutated) {
+        return false;
     }
-    //*/
 
-    //this.weights.forEach((objectRef, i, weights) => {
-    this.mutated = numberToMutate = 1 + Math.floor(randomWeightedLow() * 8);
-    let i = this.weights.randomIndex();
-    for (let j = 0; j < numberToMutate; j++) {
+    var threshold = new Float32Array(Object.keys(weightRates).length);
+    Object.keys(weightRates).forEach(function(key, rateIndex) {
+        for (let i = rateIndex; i < threshold.length; i++) {
+            threshold[i] += weightRates[key];
+        }
+    });
+
+    let i = this.weights.randomIndex(),
+        newWeight = 0;
+    for (let j = 0; j < this.mutated; j++) {
         if (++i === this.weights.length) i = 0;  // Increment/overflow.
         let chance = Math.random();
-        if (chance < threshold[0]) {
-            this.weights[i] = randomWeight();
-        } else
-        if (chance < threshold[1]) {
-            this.weights[i] = +1.0;
-        } else
-        if (chance < threshold[2]) {
-            this.weights[i] = -1.0;
-        } else
-        if (chance < threshold[3]) {
-            this.weights[i] += randomWeightedLow(9);
-            this.weights[i] = clamp(this.weights[i]);
-        } else
-        if (chance < threshold[4]) {
-            this.weights[i] -= randomWeightedLow(9);
-            this.weights[i] = clamp(this.weights[i]);
-        } else
-        if (chance < threshold[5]) {
-            this.weights[i] = -this.weights[i];
-        } else
-        if (chance < threshold[6]) {
-            this.weights[i] = 0.0;
-        } else
-        if (chance < threshold[7]) {
-            this.weights[i] = unAbs(Math.random());
+        for (let k = 0; k < threshold.length; k++) {
+            if (chance < threshold[k]) {
+                newWeight = weightFuncs[k](this.weights[i]);
+                break;
+            }
         }
-    //});
+        //console.log("Weight " + (i+1) + " of " + this.weights.length + " mutated: " + this.weights[i] + " → " + newWeight);
+        this.weights[i] = clamp(newWeight);
     }
-    /*
-    for (let i = 0; i < this.weights.length; i++) {
-        weightsDebug[i] +=  " | " + this.weights[i];
-        console.log(weightsDebug[i]);
-    }
-    //*/
 
-    //this.mutated = true;
     this.color = randomColor();
+    return this.mutated;
 
 };
 

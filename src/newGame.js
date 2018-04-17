@@ -22,6 +22,13 @@ export default function newGame(game) {
     game.results.draw = false;
     game.scoresNeverNeedDrawing = false;
 
+    // Temporary global-ish vars. TODO: Sort out.
+    var population,
+        randomIndex,
+        organismA,
+        organismB,
+        organism;
+
     // Create the first bit of food. Put in switch (gameMode) if >1 food is needed.
     spawnFood(game);
 
@@ -139,7 +146,7 @@ export default function newGame(game) {
 
         case "crazy ai":
         // Crazy lots of snakes
-            for (var s = 1; s <= 200; s++) {
+            for (var s = 1; s <= 50; s++) {
                 game.snakes.push(new Snake({
                     name: "AI " + s,
                     color: '#'+(Math.random() * 0xFFFFFF << 0).toString(16),
@@ -159,7 +166,9 @@ export default function newGame(game) {
             //game.settings.skipRender = true;
             game.ai = game.ai || {};
             game.ai.population = game.ai.population || new Population();
-            let population = game.ai.population;  // Short-er hand.
+            population = game.ai.population;  // Short-er hand.
+
+            // Two random snakes playing against each other:
             game.ai.popIndexA = game.ai.popIndexA || 1;
             game.ai.popIndexB = game.ai.popIndexB || 1;
             //game.ai.popIndexB++;
@@ -172,20 +181,14 @@ export default function newGame(game) {
                 game.ai.popIndexA = 1;
                 game.ai.popIndexB = 1;
             }
-            let randomIndex = population.organisms.randomIndex();
-            let organismA = population.organisms[game.ai.popIndexA-1];
-            let organismB = (population.settings.roundsPerOrganism ===
+            randomIndex = population.organisms.randomIndex();
+            organismA = population.organisms[game.ai.popIndexA-1];
+            organismB = (population.settings.roundsPerOrganism ===
                            population.settings.populationSize) ?
                 population.organisms[game.ai.popIndexB-1] :
                 population.organisms.random();
             // Remove any starting location bias by maybe swapping spawns:
             if (coinToss()) [organismA, organismB] = [organismB, organismA];
-            /*
-            let g = game.ai.population.genCounter,
-                a = game.ai.popIndexA,
-                b = game.ai.popIndexB;
-            console.log("Gen: " + g + " | A: " + a + " | B: " + b);
-            //*/
             organismA.roundsPlayed++;
             organismB.roundsPlayed++;
             game.snakes = [
@@ -202,12 +205,39 @@ export default function newGame(game) {
                     coords: [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
                 })
             ];
+            //*/
+
+            /*// Self-play:
+            game.ai.popIndexB = game.ai.popIndexB || 1;
+            if (game.ai.popIndexB > population.size) {
+                game.ai.popIndexB = 1;
+            }
+            game.ai.popIndexA = population.size;
+            organism = population.organisms[game.ai.popIndexB-1];
+            //console.log("PopIndexA-1: " + (game.ai.popIndexA-1));
+            organism.roundsPlayed += 2;
+            game.snakes = [
+                new Snake({
+                    color: organism.genome.color,
+                    ai: {neuralNet: organism},
+                    speed: 0,
+                    coords: [{x: 10, y: 7}, {x: 10, y: 6}, {x: 10, y: 5}]
+                }),
+                new Snake({
+                    color: organism.genome.color,
+                    ai: {neuralNet: organism},
+                    speed: 0,
+                    coords: [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
+                })
+            ];
+            */// End self play
+
             game.ai.popIndexB++;
             game.scoresNeverNeedDrawing = true;
         break;
 
         case "old ai vs new ai":
-            // TODO: Fancy user input etc.
+            // TODO: Fancy genome string input etc.
             game.ai = game.ai || {};
             game.ai.neuralNet = game.ai.neuralNet ||
                                 new NeuralNet({genome: decodeGenome(
@@ -216,7 +246,7 @@ export default function newGame(game) {
             game.snakes = [
                 new Snake({
                     name: "Old AI",
-                    ai: {},
+                    ai: {avoidance: {tubes: false}},
                     color: "black",
                     speed: 20,
                     coords: [{x: 10, y: 7}, {x: 10, y: 6}, {x: 10, y: 5}]
@@ -230,6 +260,48 @@ export default function newGame(game) {
                 })
             ];
 
+        break;
+
+
+        case "neuroevolution ai 2":
+            game.settings.autoRepeat = true;
+            game.ai = game.ai || {};
+            game.ai.population = game.ai.population || new Population();
+            population = game.ai.population;  // Short-er hand.
+            game.ai.popIndexB = game.ai.popIndexB || 1;
+            if (game.ai.popIndexB > population.size) {
+                game.ai.popIndexB = 1;
+            }
+            if (game.ai.popIndexB === population.size) {
+                game.ai.popIndexA = population.size;
+            } else {
+                game.ai.popIndexA = 0;
+            }
+            organism = population.organisms[game.ai.popIndexB-1];
+            //console.log("PopIndexA-1: " + (game.ai.popIndexA-1));
+            organism.roundsPlayed++;
+            game.snakes = [
+                new Snake({
+                    color: organism.genome.color,
+                    ai: {neuralNet: organism},
+                    speed: 0,
+                    coords: [{x: 10, y: 7}, {x: 10, y: 6}, {x: 10, y: 5}]
+                }),
+                new Snake({
+                    name: "Old AI",
+                    ai: {avoidance: {tubes: false}},
+                    color: "black",
+                    speed: 0,
+                    coords: [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
+                })
+            ];
+            // Remove any starting location bias by maybe swapping spawns:
+            if (coinToss()) {
+                [game.snakes[0].coords, game.snakes[1].coords] =
+                [game.snakes[1].coords, game.snakes[0].coords];
+            }
+            game.ai.popIndexB++;
+            game.scoresNeverNeedDrawing = true;
         break;
 
         default: console.error(

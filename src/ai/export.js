@@ -30,7 +30,7 @@ export function update(population) {
     if (!population.csv) {
         population.csv = [
             Object.keys(population.settings),
-            // Add population setting values with commas replaced with hyphens:
+            // Add population setting values with commas replaced with periods:
             Object.values(population.settings).map(
                 value => value.toString().replace(/,/g, '.')
             ),
@@ -39,8 +39,8 @@ export function update(population) {
         ];
         population.csv[0].length += 3;
         population.csv[1].length += 3;
-        population.csv[0][population.csv[0].length-2] = "Best genome from last-round:";
-        population.csv[1][population.csv[1].length-2] = "Best genome from population:";
+        population.csv[0][population.csv[0].length-2] = "Last-round best:";
+        population.csv[1][population.csv[1].length-2] = "Population best:";
     }
     var bestGenomeRecent = encodeGenome(population.bestGenomeCurrent).replace(/#/, 'c:');
     var bestGenomeEver = encodeGenome(population.bestGenomeEver).replace(/#/, 'c:');

@@ -2,7 +2,6 @@
 import { settings } from './settings.js';
 import { Neuron } from './neuron.js';
 import { Genome } from './genome.js';
-//import { encode } from './base64.js';
 import * as func from './functions.js';
 import '../lib/array.js';
 
@@ -77,7 +76,7 @@ export function NeuralNet({
         genomeWeights: genome.weights,
         cWeight: currentWeight,
         numWeights: topology[0],
-        activationFunction: null  // No activation function for the input layer.
+        activationFunc: null  // No activation function for the input layer.
     }));
 
     for (let i = 1; i < topology.length - 1; i++) {
@@ -100,13 +99,13 @@ export function NeuralNet({
         genomeWeights: genome.weights,
         cWeight: currentWeight,
         numWeights: topology.last() * (topology[topology.length-2] + 1),
-        activationFunction: func.ReLU
+        activationFunc: func.ReLU
     }));
 
     this.outputs = this.layers.last().outputs;
 
-    // Create a one dimension array version of the list of neurons, which
-    // contains references to (not copies of) the neurons in the layers:
+    // Create a one dimensional array version of the list of neurons, which
+    // contains references to (not copies of) all the neurons in the layers:
     var i = 0;
     this.neurons = [];
     for (let l = 0; l < this.layers.length; l++) {
@@ -140,7 +139,12 @@ export function NeuralNet({
  */
 NeuralNet.prototype.update = function(inputs) {
 
-    this.inputs.set(inputs);
+    try {
+        this.inputs.set(inputs);
+    } catch(error) {
+        throw new Error("NeuralNet number of inputs / topology mismatch");
+    }
+
     var onInputLayer = true;
 
     this.layers.forEach(layer => {

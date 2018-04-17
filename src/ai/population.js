@@ -105,7 +105,7 @@ Population.prototype.updateFitness = function() {
  * @param {number} ratio = settings.cullRatio Ratio of population to cull.
  */
 Population.prototype.cull = function(ratio = settings.cullRatio) {
-    //print.fitnessList(this, this.cullNum);
+    print.fitnessList(this, this.cullNum);
     this.organisms.splice(this.survivorNum);
     this.organisms.forEach(organism => {
         organism.old = true;
@@ -121,29 +121,46 @@ Population.prototype.cull = function(ratio = settings.cullRatio) {
  */
 Population.prototype.breed = function(parentsPerChild = 2) {
 
-    // Exponent to increase the chance of a
-    // higher fitness parent being selected:
+    // Exponent to modify the chance of a different
+    // fitness parent being selected over another:
     var exp = 1;
 
     // The inverse of the sum of the fitness of all non-culled organisms:
-    let fitnessTotal = 1 / (this.organisms.reduce(
+    let invTotalFitness = 1 / (this.organisms.reduce(
         (acc, cur) => acc + Math.pow(cur.genome.fitness, exp), 0
     ));
+    //console.log("invTotalFitness: " + invTotalFitness);
 
     // For every gap in the population caused by culling:
     for (let i = 0; i < this.cullNum; i++) {
 
         // Select some parents:
         let parents = [];
+
+        // Fitness proportional selection
         for (let j = 0; parents.length < parentsPerChild; j++) {
             // Overflow j to stay only selecting survivors:
             if (j === this.survivorNum) j = 0;
             let fitness = Math.pow(this.organisms[j].genome.fitness, exp);
-            if (Math.random() < fitnessTotal * fitness) {
+            //console.log("Fitness: " + fitness + ", invTotalFitness * fitness: " + invTotalFitness * fitness);
+            if (Math.random() < invTotalFitness * fitness) {
+                if (parents.length < 1) {
+                    //console.log("Breeding parent " + j + " with");
+                } else {
+                    //console.log("parent " + j);
+                }
                 parents.push(this.organisms[j]);
             }
         }
 
+        /*// Random selection:
+        parents.push(this.organisms[0]);
+        parents.push(this.organisms.random());
+        */
+        /*// Best + random selection:
+        parents.push(this.organisms[0]);
+        parents.push(this.organisms.random());
+        */
         // Crossover parents and add child to the population:
         this.organisms.push(crossover(parents));
     }
@@ -160,7 +177,7 @@ Population.prototype.resetOrganisms = function() {
     // Reset the fitness of the remaining organisms:
     this.organisms.forEach(organism => {
         if (organism.old) {
-            organism.genome.fitness = settings.baseFitness;
+            organism.genome.fitness = 0;
             organism.roundsPlayed = 0;
         }
     });
