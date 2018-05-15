@@ -28,9 +28,11 @@ export function Genome({topology, weights, color, name} = {}) {
         }
         // Make array of x length that's all initialized to 0 (super speedy):
         this.weights = new Float32Array(numOfWeights);
-        //for (let i = 0; i < this.weights.length; i++) {
-        //    this.weights[i] = settings.newWeight();
-        //}
+        if (settings.startWeight) {
+            for (let i = 0; i < this.weights.length; i++) {
+                this.weights[i] = settings.startWeight();
+            }
+        }
     }
 
     // Keep a record of the original "base" weights that the genome started
