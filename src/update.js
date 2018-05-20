@@ -69,7 +69,7 @@ export function update(game) {
         }
 
         // Update the winner count list (if it's being used):
-        if (game.results.wins.length) {
+        if (game.results.wins) {
             game.results.wins.forEach(snake => {
                 if (snake.name === game.results.winner.name) {
                     snake.wins++;

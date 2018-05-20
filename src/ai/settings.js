@@ -18,7 +18,7 @@ export const settings = Object.freeze({
 
     debug: true,           // Set to false to remove debugging properties.
     populationSize: 100,   // Number of organisms. Ideally an even integer.
-    roundsPerOrganism: 10, // Min number of rounds a snake plays per refresh.
+    roundsPerOrganism: 5,  // Min number of rounds a snake plays per refresh.
     topology: [5, 10, 3],  // Number of layers and neurons per layer.
     cullRatio: 0.7,        // % of chromosomes to kill at the end of a round.
 

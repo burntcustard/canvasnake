@@ -39,7 +39,7 @@ export function update(population) {
         population.csv.push(["Population best:"]);
         population.csv.push([]);
         population.csv.push([
-            ["generation", "average", "best", "worst", "total", "runTime"]
+            ["generation", "average", "best", "worst", "total", "runTime", "wins", "losses"]
         ]);
     }
     var bestGenomeRecent = encodeGenome(
@@ -49,14 +49,16 @@ export function update(population) {
         population.bestGenomeEver
     ).replace(/#/, 'c:');
     // TODO: Un-number-hardcode these two, get place in array from the two keys.
-    population.csv[8][1] = bestGenomeRecent;
-    population.csv[9][1] = bestGenomeEver;
+    population.csv[9][1]  = bestGenomeRecent;
+    population.csv[10][1] = bestGenomeEver;
     population.csv.push([
         population.genCounter,
         population.fitness.avg,
         population.fitness.best,
         population.fitness.worst,
         population.fitness.total,
-        population.runTime
+        population.runTime,
+        population.ownResults,
+        population.opponentResults
     ]);
 }

@@ -230,6 +230,10 @@ Population.prototype.refresh = function(results) {
     this.runTime = Math.round(this.runTime / 1000);  // ms to s.
 
     // Update data that could be exported:
+    if (results.wins) {
+        this.ownResults = results.wins[0].wins;
+        this.opponentResults = results.wins[1].wins;
+    }
     csv.update(this);
 
     // Print a line to the console with info about the last generation:
