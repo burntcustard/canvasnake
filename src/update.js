@@ -57,6 +57,7 @@ export function update(game) {
     // Game is over (but state.gameOver isn't set until update is called again)
     // Figure out who won and stuff:
     if (game.state.finalUpdate) {
+
         game.results.winner = game.snakes[0];
         for (let snakeI = 1; snakeI < game.snakes.length; snakeI++) {
             if (game.snakes[snakeI].score > game.results.winner.score) {
@@ -66,6 +67,16 @@ export function update(game) {
                 game.results.draw = true;
             }
         }
+
+        // Update the winner count list (if it's being used):
+        if (game.results.wins.length) {
+            game.results.wins.forEach(snake => {
+                if (snake.name === game.results.winner.name) {
+                    snake.wins++;
+                }
+            });
+        }
+
         // Update NeuralNet AIs, and their population:
         if (game.ai && game.ai.population) {
             // Update the fitnesses on end-of-round (e.g. points for winning):
@@ -78,9 +89,11 @@ export function update(game) {
             //console.log("A: " + game.ai.popIndexA + " | B: " + game.ai.popIndexB);
             if (game.ai.popIndexA === game.ai.population.size &&
                 game.ai.popIndexB > game.ai.population.roundsPerOrganism) {
-                game.ai.population.refresh();
+                game.ai.population.refresh(game.results);
+                game.results.wins = null;
             }
         }
+
     }
 
 }

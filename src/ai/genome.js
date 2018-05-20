@@ -8,9 +8,11 @@ import { encodeGenome } from './genomeStr.js';
 
 
 /**
- * [[Description]]
- * @param {[[Type]]} topology [[Description]]
- * @param {[[Type]]} weights  [[Description]]
+ * Genome constructor.
+ * @param {Array}  topology The intended neural network structure.
+ * @param {Array}  weights  Float32Array set of weights given to the genome.
+ * @param {string} color   Color of the resultant organism, e.g. "#ff600".
+ * @param {string} name    Name of the resultant organism, e.g. "fred".
  */
 export function Genome({topology, weights, color, name} = {}) {
 
@@ -60,30 +62,26 @@ Genome.prototype.getMutatedWeights = function() {
 
 /**
  * Mutates a neural network's genome (i.e. mutates an organism).
- * A random weight in the genome is chosen to mutate, and then a
- * replacement weight value is chosen. The mutation amount
- * @param {number} amount   How much the original weight value should
- *                          change. 0 meaning no change, 1 meaning the
- *                          old value is replaced with the new, 0.5
- *                          meaning that the replacement will be half
- *                          way in between the old and new values.
- * @param {number} tendancy How likely it is a particular weight will be mutated.
- *                          E.g. 0.1 means on average, 1 in every 10 will mutate.
+ *
+ * The amount of mutation is decided by settings.mutationAmount()
+ * - which may return a number <= 0, resulting in no mutation occuring.
+ *
+ * There is an issue with this function in it's current state, as it always
+ * starts at a random weight to mutate and then mutates ones after it. I.e.
+ * a cluster of weights are mutated. Ideally, neither a cluster, nor just
+ * randomly chosen individual weights should be mutated, but a selection of
+ * randomly sized clusters, as the following depicts:
+ *
+ * Need to do  [x x x - - x - -]
+ * rather than [- x - - x - x -]
+ * or          [- - - x x x - -]
+ *
+ * @param   {Array} weightRates = The likelyhood of each mutation function.
+ * @param   {Array} weightFuncs = The functions to use to mutate the weights.
+ * @returns {number} The amount of weights that were mutated in the genome.
  */
 Genome.prototype.mutate = function(
-    //amountToMutate = settings.mutationAmount,
-    //numberToMutate = settings.mutationNumber,
-    //tendancy = settings.mutationTendancy,
-    weightRates = {
-        new: 0.8,
-        max: 0,
-        min: 0,
-        pos: 0,
-        neg: 0,
-        flip: 0.2,
-        zero: 0,
-        rand: 0
-    },
+    weightRates = settings.mutations,
     weightFuncs = [
         function() { return settings.newWeight(); },
         function() { return +1; },
@@ -96,12 +94,9 @@ Genome.prototype.mutate = function(
     ]
 ) {
 
-    // Need to do  [x x x - - x - -]
-    // rather than [- x - - x - x -]
-    // or          [- - - x x x - -] ?
-
+    // How much do we mutate this genome
+    // (if at all? settings.mutationAmountis semi-random!)
     this.mutated = settings.mutationAmount();
-
     if (!this.mutated) {
         return false;
     }

@@ -1,6 +1,13 @@
 
-
-export function generationDetails(pop) {
+/**
+ * Prints a set of details about a neuroevolutionary generation.
+ *
+ * Note: The whitespacing in the strings is VERY important to get things lined up.
+ *
+ * @param {object} pop The population of organisms who's generation details are being printed.
+ * @param {Array} wins The array of win counters (in case a pop is being compared to something).
+ */
+export function generationDetails(pop, winCounter) {
 
     let fitnessDiff = {
         total: pop.fitness.total - pop.oldFitness.total,
@@ -14,11 +21,27 @@ export function generationDetails(pop) {
     let avgStr = (pop.fitness.avg.toString()).padStart(6) + diffStr(fitnessDiff.avg).padEnd(8);
     let bestStr = (pop.fitness.best.toString()).padStart(6) + diffStr(fitnessDiff.best).padEnd(8);
     let worstStr = (pop.fitness.worst.toString()).padStart(6) + diffStr(fitnessDiff.worst).padEnd(8);
-    //console.log("Gen: " + this.genCounter + timeStr + " Fitness:");
-    if (pop.genCounter === 1) {
-        console.log("       | Time |   Average    |     Best     |    Worst");
+
+
+    let fullStr = genStr + " | " + timeStr + " |" + avgStr + "|" + bestStr + "|" + worstStr;
+
+    if (winCounter) {
+        fullStr += " | " +
+                   winCounter[0].wins.toString().padStart(6) +
+                   ":" +
+                   winCounter[1].wins.toString().padEnd(6);
     }
-    console.log(genStr+" | "+timeStr+" |"+ avgStr+"|"+bestStr+"|"+worstStr);
+
+    if (pop.genCounter === 1) {
+        let headerStr = "       | Time |   Average    |     Best     |    Worst";
+        if (winCounter) headerStr += "      | " +
+                               winCounter[0].name.padStart(6) +
+                               ":" +
+                               winCounter[1].name.padEnd(6);
+        console.log(headerStr);
+    }
+
+    console.log(fullStr);
 
 }
 

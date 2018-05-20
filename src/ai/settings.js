@@ -15,12 +15,31 @@ import { unAbs } from '../lib/misc.js';
  */
 
 export const settings = Object.freeze({
+
     debug: true,           // Set to false to remove debugging properties.
-    populationSize: 100,   // Number of organisms. Probably has to be even.
-    roundsPerOrganism: 1,  // Min number of rounds a snake plays per refresh.
-    topology: [5, 10, 3],  // Number of layers and neurons per layer. ai2: 902.
-    cullRatio: 0.7,        // % of chromosomes to kill at end of round.
+    populationSize: 100,   // Number of organisms. Ideally an even integer.
+    roundsPerOrganism: 10, // Min number of rounds a snake plays per refresh.
+    topology: [5, 10, 3],  // Number of layers and neurons per layer.
+    cullRatio: 0.7,        // % of chromosomes to kill at the end of a round.
+
     startWeight:    () => 0,
     newWeight:      () => unAbs(randomWeightedLow(3)),
-    mutationAmount: () => Math.max(Math.floor(randomWeightedLow(1) * 9 - 1), 0)
+
+    // The number of neuron weights that are mutated in every new snake. If the
+    // semi-random number for an individual is <= 0, that snake is not mutated.
+    mutationAmount: () => Math.max(Math.floor(randomWeightedLow() * 9 - 1), 0),
+
+    // The likelyhood of an action to occur on a weight that's being mutated.
+    // Order is important as they line up with functions in Genome.mutate().
+    mutations: {
+        new: 0.8,
+        max: 0,
+        min: 0,
+        pos: 0,
+        neg: 0,
+        flip: 0.2,
+        zero: 0,
+        rand: 0
+    }
+
 });

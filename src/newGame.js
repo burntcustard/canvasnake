@@ -9,6 +9,17 @@ import { decodeGenome } from './ai/genomeStr.js';
 
 
 
+function initWinCounter(game) {
+    game.results.wins = [];
+    game.snakes.forEach(snake => {
+        game.results.wins.push({
+            name: snake.name,
+            wins: 0
+        });
+    });
+}
+
+
 export default function newGame(game) {
 
     // Clear / reset stuff
@@ -69,9 +80,8 @@ export default function newGame(game) {
         break;
 
         case "single player vs ai":
-            let neuralNetAI = new NeuralNet({genome: decodeGenome(
-                "#800080|f:4681|5.12.3|-6DTm-8YwU+67cD-KALn+GclC+6JGO-CBKC+8d_k+4utz-MkZa+2DLQ+FbMl-1gr_+APJF-4tNq-6zVi+FvQz-67kL+6WgH-1RUz+XkSc+4lp9-ChSW+15Ha+5A$k-8zrj-9h0w-2ZjW+DyTP-1Vhe+5o6e-3GWF+F7yk-1k5l-DCQB-GwIe-6cmU-D5$L+6J8M+N4jo-7dAZ-2PIT-2yB8-3n2R+44FP+TBuR-4HiK+49Hy+3roB-7F29+6vG3+PVp0-5Cf5+A6ua-E9TW-CMac-AnWA+1YdV-Nerv+2f5K+53X0+AUfZ+MvHE-Fah$+Mf2z-1K5G-QSGG-0fSi+1amw+16aO+JShj+4l3I-13q8-5Tiw+8cV0+K9Na+6VP3-1R06-II70+B0hZ-9U_c-0Wa4-IFvE+7OAz+5umy+7gLk-0cU4+2Dlx+EKgg-6UnO+4qJP-0E11+AoLL+8qfj-2NIg+9qxo-3VgU+DMMf-PjQV-HJNS+4pVX+0bnX-2iky+3Vn3+3Xsw+4ySU+3jnE-22bc-0Hjp+9Svd+M0kQ+3hG9-52qW+09YB-BzPV-2sdx"
-            )});
+            // Decoding genome w/o an argument decodes the default genome in /ai/genomeStr.js
+            let neuralNetAI = new NeuralNet({genome: decodeGenome()});
             game.snakes = [
                 new Snake({
                     name: "Player 1",
@@ -240,7 +250,10 @@ export default function newGame(game) {
         break;
 
         case "old ai vs new ai":
+            // This is a test with a single neural net AI who's
+            // genome is input, versus a single old AI snake.
             // TODO: Fancy genome string input etc.
+            game.settings.autoRepeat = true;
             game.ai = game.ai || {};
             game.ai.neuralNet = game.ai.neuralNet ||
                                 new NeuralNet({genome: decodeGenome(
@@ -251,18 +264,26 @@ export default function newGame(game) {
                     name: "Old AI",
                     ai: {avoidance: {tubes: false}},
                     color: "black",
-                    speed: 20,
+                    speed: 0,
                     coords: [{x: 10, y: 7}, {x: 10, y: 6}, {x: 10, y: 5}]
                 }),
                 new Snake({
                     name: game.ai.neuralNet.genome.name || "NeuralNet AI",
                     ai: {neuralNet: game.ai.neuralNet},
                     color: game.ai.neuralNet.genome.color,
-                    speed: 20,
+                    speed: 0,
                     coords: [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
                 })
             ];
 
+            // Remove any starting location bias by maybe swapping spawns:
+            if (coinToss()) {
+                [game.snakes[0].coords, game.snakes[1].coords] =
+                [game.snakes[1].coords, game.snakes[0].coords];
+            }
+
+            if (!game.results.wins) initWinCounter(game);
+            game.drawWinsNotScores = true;
         break;
 
 
@@ -271,20 +292,20 @@ export default function newGame(game) {
             game.ai = game.ai || {};
             game.ai.population = game.ai.population || new Population();
             population = game.ai.population;  // Short-er hand.
+            game.ai.popIndexA = game.ai.popIndexA || 1;
             game.ai.popIndexB = game.ai.popIndexB || 1;
-            if (game.ai.popIndexB > population.size) {
+            if (game.ai.popIndexB > population.roundsPerOrganism) {
                 game.ai.popIndexB = 1;
+                game.ai.popIndexA++;
+                if (game.ai.popIndexA > population.size) {
+                    game.ai.popIndexA = 1;
+                }
             }
-            if (game.ai.popIndexB === population.size) {
-                game.ai.popIndexA = population.size;
-            } else {
-                game.ai.popIndexA = 0;
-            }
-            organism = population.organisms[game.ai.popIndexB-1];
-            //console.log("PopIndexA-1: " + (game.ai.popIndexA-1));
+            organism = population.organisms[game.ai.popIndexA-1];
             organism.roundsPlayed++;
             game.snakes = [
                 new Snake({
+                    name: "NN AI",
                     color: organism.genome.color,
                     ai: {neuralNet: organism},
                     speed: 0,
@@ -298,6 +319,7 @@ export default function newGame(game) {
                     coords: [{x: 20, y: 7}, {x: 20, y: 6}, {x: 20, y: 5}]
                 })
             ];
+            if (!game.results.wins) initWinCounter(game);
             // Remove any starting location bias by maybe swapping spawns:
             if (coinToss()) {
                 [game.snakes[0].coords, game.snakes[1].coords] =

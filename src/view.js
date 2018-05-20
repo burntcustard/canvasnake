@@ -200,7 +200,7 @@ export function drawScores(ui, snakes, highScore, onlyAI) {
     if (ui === undefined || ui.clear === undefined) {
         return;
     }
-    
+
     ui.clear(ui.textCtx);
 
     // Draw scores:
@@ -238,16 +238,69 @@ export function drawScores(ui, snakes, highScore, onlyAI) {
 
 
 
+export function drawWins(ui, results) {
+
+    // If UI doesn't exist properly yet then we can't do anything:
+    if (ui === undefined || ui.clear === undefined) {
+        return;
+    }
+
+    // If there are no results or results are broken somehow don't do anything:
+    if (!results.wins) {
+        return;
+    }
+
+    ui.clear(ui.textCtx);
+
+    // Draw wins:
+    /*
+    for (let i = 0; i < results.wins.length; i++) {
+        let snake = results.wins[i];
+        write(
+            ui.textCtx,
+            ui.textSize,
+            ui.textColor,
+            "left",
+            "bottom",
+            (snake.name + ": " + snake.wins),
+            (i * 120 * ui.scale + 4 * ui.scale),
+            ui.textCanvas.height - 2 * ui.scale
+        );
+    }*/
+    write(
+        ui.textCtx,
+        ui.textSize,
+        ui.textColor,
+        "left",
+        "bottom",
+        results.wins[0].name + ": " + results.wins[0].wins,
+        (4 * ui.scale),
+        (ui.textCanvas.height - 2 * ui.scale)
+    )
+    write(
+        ui.textCtx,
+        ui.textSize,
+        ui.textColor,
+        "right",
+        "bottom",
+        results.wins[1].name + ": " + results.wins[1].wins,
+        (ui.canvas.width - 5 * ui.scale),
+        (ui.textCanvas.height - 2 * ui.scale)
+    )
+}
+
+
+
 export function drawEndScreen(ui, snakes, results) {
 
     var winningSnake = results.winner,
         winnerText = "",
         draw = false,
         theScores = "";
-    
+
     if (snakes.length === 1) {
         winnerText = ("You dead, score: " + snakes[0].score);
-        
+
     } else {
         if (!results.draw) {
             winnerText = (winningSnake.name + " Wins!");
@@ -314,12 +367,19 @@ export function render(game, forceTextRender) {
 
     // Draw scores:
     if (!game.scoresNeverNeedDrawing && game.scoresNeedDrawing) {
-        drawScores(
-            game.ui,
-            game.snakes,
-            game.highScores[game.settings.gameMode],
-            game.state.onlyAI
-        );
+        if (game.drawWinsNotScores) {
+            drawWins(
+                game.ui,
+                game.results
+            );
+        } else {
+            drawScores(
+                game.ui,
+                game.snakes,
+                game.highScores[game.settings.gameMode],
+                game.state.onlyAI
+            );
+        }
         game.scoresNeedDrawing = false;
     }
 

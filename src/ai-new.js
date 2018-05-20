@@ -5,6 +5,16 @@ import { cardinalToRelative, relativeToCardinal } from './ai/relCard.js';
 
 
 
+/**
+ * Get input values for the neural network based of the current state of the game.
+ *
+ * There's a lot of commented out code here that were attempts at feeding the neural nets
+ * more information, but they didn't seem to significantly help (only prolong training).
+ *
+ * @param   {object}   snake The snake that inputs are being gathered for.
+ * @param   {object}   game  Reference to the game object.
+ * @returns {Float32Array} Input values for the snake's neural net.
+ */
 function getInputs(snake, game) {
 
     var inputs = [];

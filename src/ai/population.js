@@ -205,7 +205,7 @@ Population.prototype.updateBests = function() {
  * Updates population properties, it's members fitnesses,
  * culls badly performing members and breeds new ones, etc.
  */
-Population.prototype.refresh = function() {
+Population.prototype.refresh = function(results) {
 
     // Increment generation counter (so the the following is "gen1+")
     this.genCounter++;
@@ -233,7 +233,7 @@ Population.prototype.refresh = function() {
     csv.update(this);
 
     // Print a line to the console with info about the last generation:
-    print.generationDetails(this);
+    print.generationDetails(this, results.wins);
 
     // Kill some organisms, breed replacements, reset values of old ones:
     this.cull();
